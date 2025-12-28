@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Sort | Modern Viz</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <a href="index.html" class="nav-link">
+        <span>&#8592;</span> Back
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <header>
+        <h1>Selection Sort</h1>
+        <div class="complexity-stats">
+            <span>Time: O(n²)</span>
+            <span>Space: O(1)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="resetArray()" id="resetBtn">New</button>
+        <button onclick="startSort()" id="startBtn">Start</button>
+        <button onclick="pauseSort()" id="pauseBtn" disabled>Pause</button>
+        <button onclick="continueSort()" id="continueBtn" disabled>Resume</button>
+        
+        <div class="speed-control">
+            <span>Fast</span>
+            <input type="range" id="speedSlider" min="10" max="500" value="200">
+            <span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div class="chart-container" id="chart-container"></div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                </div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">selectionSort</span>(arr) {</span><span id="line-2" class="code-line">  <span class="kw">const</span> n = arr.length;</span><span id="line-3" class="code-line">  <span class="kw">for</span> (<span class="kw">let</span> i = 0; i < n; i++) {</span><span id="line-4" class="code-line">    <span class="kw">let</span> min = i;</span><span id="line-5" class="code-line">    <span class="kw">for</span> (<span class="kw">let</span> j = i + 1; j < n; j++) {</span><span id="line-6" class="code-line">      <span class="comment">// Find minimum</span></span><span id="line-7" class="code-line">      <span class="kw">if</span> (arr[j] < arr[min]) {</span><span id="line-8" class="code-line">        min = j;</span><span id="line-9" class="code-line">      }</span><span id="line-10" class="code-line">    }</span><span id="line-11" class="code-line">    <span class="kw">if</span> (min !== i) swap(i, min);</span><span id="line-12" class="code-line">  }</span><span id="line-13" class="code-line">}</span></pre>
+        </div>
+    </div>
+
+    <details class="info-box">
+        <summary>How it Works</summary>
+        <div class="info-content">
+            <p><strong>Concept:</strong> Selection Sort is a simple comparison-based algorithm. It divides the array into a sorted part and an unsorted part.</p>
+            <p><strong>Steps:</strong></p>
+            <ul>
+                <li><strong>Find Minimum:</strong> It scans the unsorted part to find the smallest element.</li>
+                <li><strong>Swap:</strong> The smallest element is swapped with the first element of the unsorted part.</li>
+                <li><strong>Repeat:</strong> The sorted boundary moves one step to the right, and the process repeats until the array is fully sorted.</li>
+            </ul>
+        </div>
+    </details>
+
+    <script>
+        const container = document.getElementById('chart-container');
+        const sortBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const statusText = document.getElementById('status-text');
+        const themeBtn = document.getElementById('themeBtn');
+        
+        let array = [];
+        const ARRAY_SIZE = 30;
+        let audioCtx = null;
+        let stopRequested = false;
+        let isPaused = false;
+        let pauseResolver = null;
+
+        // Icons
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerHTML = moonIcon;
+            } else {
+                themeBtn.innerHTML = sunIcon;
+            }
+        }
+
+        function playNote(value) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const frequency = 200 + (value * 6);
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function highlightLine(lineNumber) {
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            const line = document.getElementById(`line-${lineNumber}`);
+            if (line) line.classList.add('active-line');
+        }
+
+        // --- PAUSE LOGIC ---
+        async function checkPause() {
+            if (isPaused) {
+                statusText.innerText = "PAUSED";
+                statusText.style.color = "var(--accent-min)";
+                await new Promise(resolve => { pauseResolver = resolve; });
+                statusText.innerText = "RUNNING";
+                statusText.style.color = "var(--accent-green)";
+            }
+        }
+
+        function resetArray() {
+            stopRequested = true;
+            isPaused = false;
+            if (pauseResolver) pauseResolver();
+
+            setTimeout(() => {
+                stopRequested = false;
+                array = [];
+                container.innerHTML = '';
+                for (let i = 0; i < ARRAY_SIZE; i++) {
+                    const val = Math.floor(Math.random() * 90) + 10;
+                    array.push(val);
+                    const bar = document.createElement('div');
+                    bar.classList.add('bar');
+                    bar.style.height = `${val}%`;
+                    bar.id = `bar-${i}`;
+                    container.appendChild(bar);
+                }
+                highlightLine(0);
+                updateControls("reset");
+                statusText.innerText = "SYSTEM READY";
+                statusText.style.color = "var(--text-secondary)";
+            }, 100);
+        }
+
+        function startSort() {
+            stopRequested = false;
+            isPaused = false;
+            statusText.innerText = "RUNNING";
+            statusText.style.color = "var(--accent-green)";
+            updateControls("running");
+            selectionSort();
+        }
+
+        function pauseSort() {
+            if (!isPaused) {
+                isPaused = true;
+                updateControls("paused");
+            }
+        }
+
+        function continueSort() {
+            if (isPaused) {
+                isPaused = false;
+                if (pauseResolver) pauseResolver();
+                updateControls("running");
+            }
+        }
+
+        function updateControls(state) {
+            if (state === "running") {
+                sortBtn.disabled = true;
+                resetBtn.disabled = true;
+                pauseBtn.disabled = false;
+                continueBtn.disabled = true;
+                speedSlider.disabled = false;
+            } else if (state === "paused") {
+                sortBtn.disabled = true;
+                resetBtn.disabled = false;
+                pauseBtn.disabled = true;
+                continueBtn.disabled = false;
+                speedSlider.disabled = true;
+            } else if (state === "reset") {
+                sortBtn.disabled = false;
+                resetBtn.disabled = false;
+                pauseBtn.disabled = true;
+                continueBtn.disabled = true;
+                speedSlider.disabled = false;
+            }
+        }
+
+        async function selectionSort() {
+            initAudio(); highlightLine(1);
+            const n = array.length;
+            
+            for (let i = 0; i < n; i++) {
+                if(stopRequested) break;
+                await checkPause(); if(stopRequested) break;
+                
+                highlightLine(3);
+                let min = i;
+                document.getElementById(`bar-${min}`).classList.add('min');
+
+                highlightLine(5);
+                for (let j = i + 1; j < n; j++) {
+                    if(stopRequested) break;
+                    await checkPause(); if(stopRequested) break;
+                    
+                    const barJ = document.getElementById(`bar-${j}`);
+                    barJ.classList.add('scan');
+                    playNote(array[j]);
+                    await sleep(speedSlider.value);
+
+                    highlightLine(7);
+                    if (array[j] < array[min]) {
+                        document.getElementById(`bar-${min}`).classList.remove('min');
+                        min = j;
+                        highlightLine(8);
+                        document.getElementById(`bar-${min}`).classList.add('min');
+                    }
+                    barJ.classList.remove('scan');
+                }
+
+                highlightLine(11);
+                if (min !== i) {
+                    let temp = array[i]; 
+                    array[i] = array[min]; 
+                    array[min] = temp;
+                    
+                    document.getElementById(`bar-${i}`).style.height = `${array[i]}%`;
+                    document.getElementById(`bar-${min}`).style.height = `${array[min]}%`;
+                    playNote(array[i]);
+                }
+                
+                document.getElementById(`bar-${min}`).classList.remove('min');
+                document.getElementById(`bar-${i}`).classList.add('sorted');
+                await sleep(speedSlider.value);
+            }
+            
+            if (!stopRequested) {
+                statusText.innerText = "COMPLETE";
+                statusText.style.color = "var(--accent-green)";
+                updateControls("reset");
+            }
+            highlightLine(13);
+        }
+
+        window.onload = resetArray;
+    </script>
+</body>
+</html>

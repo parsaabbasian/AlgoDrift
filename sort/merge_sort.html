@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Sort | Modern Viz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <a href="index.html" class="nav-link">
+        <span>&#8592;</span> Back
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <header>
+        <h1>Merge Sort</h1>
+        <div class="complexity-stats">
+            <span>Time: O(n log n)</span>
+            <span>Space: O(n)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="resetArray()" id="resetBtn">New</button>
+        <button onclick="startSort()" id="startBtn">Start</button>
+        <button onclick="pauseSort()" id="pauseBtn" disabled>Pause</button>
+        <button onclick="continueSort()" id="continueBtn" disabled>Resume</button>
+        
+        <div class="speed-control">
+            <span>Fast</span>
+            <input type="range" id="speedSlider" min="10" max="500" value="100">
+            <span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div class="chart-container" id="chart-container"></div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                </div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">mergeSort</span>(arr, l, r) {</span><span id="line-2" class="code-line">  <span class="kw">if</span> (l >= r) <span class="kw">return</span>;</span><span id="line-3" class="code-line">  <span class="kw">const</span> m = l + Math.floor((r - l) / 2);</span><span id="line-4" class="code-line">  mergeSort(arr, l, m);</span><span id="line-5" class="code-line">  mergeSort(arr, m + 1, r);</span><span id="line-6" class="code-line">  merge(arr, l, m, r);</span><span id="line-7" class="code-line">}</span><span id="line-8" class="code-line"> </span><span id="line-9" class="code-line"><span class="kw">function</span> <span class="func">merge</span>(arr, l, m, r) {</span><span id="line-10" class="code-line">  <span class="comment">// Copy data to temp arrays</span></span><span id="line-11" class="code-line">  <span class="comment">// Merge back to arr[l..r]</span></span><span id="line-12" class="code-line">}</span></pre>
+        </div>
+    </div>
+
+    <details class="info-box">
+        <summary>How it Works</summary>
+        <div class="info-content">
+            <p><strong>Concept:</strong> Merge Sort is a divide-and-conquer algorithm. It divides the input array into two halves, recursively sorts them, and then merges the two sorted halves.</p>
+            <p><strong>Steps:</strong></p>
+            <ul>
+                <li><strong>Divide:</strong> Find the middle point to divide the array into two halves.</li>
+                <li><strong>Conquer:</strong> Recursively call mergeSort for the first half and the second half.</li>
+                <li><strong>Combine:</strong> Merge the two halves sorted in step 2. This is where the actual sorting happens as elements are put back in order.</li>
+            </ul>
+        </div>
+    </details>
+
+    <script>
+        const container = document.getElementById('chart-container');
+        const sortBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const statusText = document.getElementById('status-text');
+        const themeBtn = document.getElementById('themeBtn');
+        
+        let array = [];
+        const ARRAY_SIZE = 40;
+        let audioCtx = null;
+        let stopRequested = false;
+        let isPaused = false;
+        let pauseResolver = null;
+
+        // Icons
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerHTML = moonIcon;
+            } else {
+                themeBtn.innerHTML = sunIcon;
+            }
+        }
+
+        function playNote(value, type = 'sine') {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const frequency = 200 + (value * 6);
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function highlightLine(lineNumber) {
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            const line = document.getElementById(`line-${lineNumber}`);
+            if (line) line.classList.add('active-line');
+        }
+
+        async function checkPause() {
+            if (isPaused) {
+                statusText.innerText = "PAUSED";
+                statusText.style.color = "var(--accent-pivot)";
+                await new Promise(resolve => { pauseResolver = resolve; });
+                statusText.innerText = "RUNNING";
+                statusText.style.color = "var(--accent-green)";
+            }
+        }
+
+        function resetArray() {
+            stopRequested = true;
+            isPaused = false;
+            if (pauseResolver) pauseResolver();
+
+            setTimeout(() => {
+                stopRequested = false;
+                array = [];
+                container.innerHTML = '';
+                for (let i = 0; i < ARRAY_SIZE; i++) {
+                    const val = Math.floor(Math.random() * 90) + 10;
+                    array.push(val);
+                    const bar = document.createElement('div');
+                    bar.classList.add('bar');
+                    bar.style.height = `${val}%`;
+                    bar.id = `bar-${i}`;
+                    container.appendChild(bar);
+                }
+                highlightLine(0);
+                updateControls("reset");
+                statusText.innerText = "SYSTEM READY";
+                statusText.style.color = "var(--text-secondary)";
+            }, 100);
+        }
+
+        function startSort() {
+            stopRequested = false;
+            isPaused = false;
+            statusText.innerText = "RUNNING";
+            statusText.style.color = "var(--accent-green)";
+            updateControls("running");
+            runMergeSort();
+        }
+
+        function pauseSort() {
+            if (!isPaused) {
+                isPaused = true;
+                updateControls("paused");
+            }
+        }
+
+        function continueSort() {
+            if (isPaused) {
+                isPaused = false;
+                if (pauseResolver) pauseResolver();
+                updateControls("running");
+            }
+        }
+
+        function updateControls(state) {
+            if (state === "running") {
+                sortBtn.disabled = true;
+                resetBtn.disabled = true;
+                pauseBtn.disabled = false;
+                continueBtn.disabled = true;
+                speedSlider.disabled = false;
+            } else if (state === "paused") {
+                sortBtn.disabled = true;
+                resetBtn.disabled = false;
+                pauseBtn.disabled = true;
+                continueBtn.disabled = false;
+                speedSlider.disabled = true;
+            } else if (state === "reset") {
+                sortBtn.disabled = false;
+                resetBtn.disabled = false;
+                pauseBtn.disabled = true;
+                continueBtn.disabled = true;
+                speedSlider.disabled = false;
+            }
+        }
+
+        async function runMergeSort() {
+            initAudio();
+            await mergeSort(0, array.length - 1);
+            if (!stopRequested) {
+                statusText.innerText = "COMPLETE";
+                statusText.style.color = "var(--accent-green)";
+                for(let i = 0; i < array.length; i++) {
+                    document.getElementById(`bar-${i}`).classList.add('sorted');
+                }
+                updateControls("reset");
+            }
+        }
+
+        async function mergeSort(l, r) {
+            if (l >= r || stopRequested) return;
+            
+            await checkPause(); if(stopRequested) return;
+            highlightLine(1); highlightLine(2);
+            
+            const m = l + Math.floor((r - l) / 2);
+            
+            highlightLine(4); 
+            await mergeSort(l, m);
+            await checkPause(); if(stopRequested) return; // Check after recursive call
+
+            highlightLine(5); 
+            await mergeSort(m + 1, r);
+            await checkPause(); if(stopRequested) return; // Check after recursive call
+
+            highlightLine(6); 
+            await merge(l, m, r);
+        }
+
+        async function merge(l, m, r) {
+            if (stopRequested) return;
+            highlightLine(9);
+            
+            const n1 = m - l + 1;
+            const n2 = r - m;
+            let L = new Array(n1);
+            let R = new Array(n2);
+
+            // Highlight sub-arrays being merged
+            for (let i = 0; i < n1; i++) {
+                L[i] = array[l + i];
+                const bar = document.getElementById(`bar-${l+i}`);
+                if(bar) bar.classList.add('active');
+            }
+            for (let j = 0; j < n2; j++) {
+                R[j] = array[m + 1 + j];
+                const bar = document.getElementById(`bar-${m+1+j}`);
+                if(bar) bar.classList.add('active');
+            }
+            
+            await sleep(speedSlider.value);
+            
+            let i = 0, j = 0, k = l;
+
+            while (i < n1 && j < n2) {
+                await checkPause(); if(stopRequested) return;
+                playNote(array[k]);
+                
+                if (L[i] <= R[j]) {
+                    array[k] = L[i];
+                    i++;
+                } else {
+                    array[k] = R[j];
+                    j++;
+                }
+                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
+                await sleep(speedSlider.value);
+                k++;
+            }
+
+            while (i < n1) {
+                await checkPause(); if(stopRequested) return;
+                array[k] = L[i];
+                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
+                i++;
+                k++;
+                await sleep(speedSlider.value);
+            }
+
+            while (j < n2) {
+                await checkPause(); if(stopRequested) return;
+                array[k] = R[j];
+                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
+                j++;
+                k++;
+                await sleep(speedSlider.value);
+            }
+
+            // Remove highlight
+            for (let x = l; x <= r; x++) {
+                const bar = document.getElementById(`bar-${x}`);
+                if(bar) bar.classList.remove('active');
+            }
+        }
+
+        window.onload = resetArray;
+    </script>
+</body>
+</html>

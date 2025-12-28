@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insertion Sort | Modern Viz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <a href="index.html" class="nav-link">
+        <span>&#8592;</span> Back
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <header>
+        <h1>Insertion Sort</h1>
+        <div class="complexity-stats">
+            <span>Time: O(n²)</span>
+            <span>Space: O(1)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="resetArray()" id="resetBtn">New</button>
+        <button onclick="startSort()" id="startBtn">Start</button>
+        <button onclick="pauseSort()" id="pauseBtn" disabled>Pause</button>
+        <button onclick="continueSort()" id="continueBtn" disabled>Resume</button>
+        
+        <div class="speed-control">
+            <span>Fast</span>
+            <input type="range" id="speedSlider" min="10" max="500" value="200">
+            <span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div class="chart-container" id="chart-container"></div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                </div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">insertionSort</span>(arr) {</span><span id="line-2" class="code-line">  <span class="kw">for</span> (<span class="kw">let</span> i = 1; i < arr.length; i++) {</span><span id="line-3" class="code-line">    <span class="kw">let</span> key = arr[i];</span><span id="line-4" class="code-line">    <span class="kw">let</span> j = i - 1;</span><span id="line-5" class="code-line">    <span class="comment">// Move elements > key</span></span><span id="line-6" class="code-line">    <span class="kw">while</span> (j >= 0 && arr[j] > key) {</span><span id="line-7" class="code-line">      arr[j + 1] = arr[j];</span><span id="line-8" class="code-line">      j--;</span><span id="line-9" class="code-line">    }</span><span id="line-10" class="code-line">    arr[j + 1] = key;</span><span id="line-11" class="code-line">  }</span><span id="line-12" class="code-line">}</span></pre>
+        </div>
+    </div>
+
+    <details class="info-box">
+        <summary>How it Works</summary>
+        <div class="info-content">
+            <p><strong>Concept:</strong> Insertion Sort builds the sorted array one item at a time. It is much like sorting playing cards in your hand.</p>
+            <p><strong>Steps:</strong></p>
+            <ul>
+                <li><strong>Pick Key:</strong> It starts from the second element (the key) and compares it with the elements before it.</li>
+                <li><strong>Shift:</strong> If the key is smaller than the previous element, it shifts the previous element to the right.</li>
+                <li><strong>Insert:</strong> This repeats until the correct position for the key is found, and it is inserted there.</li>
+            </ul>
+        </div>
+    </details>
+
+    <script>
+        const container = document.getElementById('chart-container');
+        const sortBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const statusText = document.getElementById('status-text');
+        const themeBtn = document.getElementById('themeBtn');
+        
+        let array = [];
+        const ARRAY_SIZE = 20;
+        let audioCtx = null;
+        let stopRequested = false;
+        let isPaused = false;
+        let pauseResolver = null;
+
+        // Icons
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerHTML = moonIcon;
+            } else {
+                themeBtn.innerHTML = sunIcon;
+            }
+        }
+
+        function playNote(value) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const frequency = 200 + (value * 6);
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function highlightLine(lineNumber) {
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            const line = document.getElementById(`line-${lineNumber}`);
+            if (line) line.classList.add('active-line');
+        }
+
+        async function checkPause() {
+            if (isPaused) {
+                statusText.innerText = "PAUSED";
+                statusText.style.color = "var(--accent-pivot)";
+                await new Promise(resolve => { pauseResolver = resolve; });
+                statusText.innerText = "RUNNING";
+                statusText.style.color = "var(--accent-green)";
+            }
+        }
+
+        function resetArray() {
+            stopRequested = true;
+            isPaused = false;
+            if (pauseResolver) pauseResolver();
+
+            setTimeout(() => {
+                stopRequested = false;
+                array = [];
+                container.innerHTML = '';
+                for (let i = 0; i < ARRAY_SIZE; i++) {
+                    const val = Math.floor(Math.random() * 90) + 10;
+                    array.push(val);
+                    const bar = document.createElement('div');
+                    bar.classList.add('bar');
+                    bar.style.height = `${val}%`;
+                    bar.id = `bar-${i}`;
+                    container.appendChild(bar);
+                }
+                highlightLine(0);
+                updateControls("reset");
+                statusText.innerText = "SYSTEM READY";
+                statusText.style.color = "var(--text-secondary)";
+            }, 100);
+        }
+
+        function startSort() {
+            stopRequested = false;
+            isPaused = false;
+            statusText.innerText = "RUNNING";
+            statusText.style.color = "var(--accent-green)";
+            updateControls("running");
+            insertionSort();
+        }
+
+        function pauseSort() {
+            if (!isPaused) {
+                isPaused = true;
+                updateControls("paused");
+            }
+        }
+
+        function continueSort() {
+            if (isPaused) {
+                isPaused = false;
+                if (pauseResolver) pauseResolver();
+                updateControls("running");
+            }
+        }
+
+        function updateControls(state) {
+            if (state === "running") {
+                sortBtn.disabled = true;
+                resetBtn.disabled = true;
+                pauseBtn.disabled = false;
+                continueBtn.disabled = true;
+                speedSlider.disabled = false;
+            } else if (state === "paused") {
+                sortBtn.disabled = true;
+                resetBtn.disabled = false;
+                pauseBtn.disabled = true;
+                continueBtn.disabled = false;
+                speedSlider.disabled = true;
+            } else if (state === "reset") {
+                sortBtn.disabled = false;
+                resetBtn.disabled = false;
+                pauseBtn.disabled = true;
+                continueBtn.disabled = true;
+                speedSlider.disabled = false;
+            }
+        }
+
+        async function insertionSort() {
+            initAudio(); 
+            highlightLine(1);
+            
+            const n = array.length;
+            
+            highlightLine(2); 
+            for (let i = 1; i < n; i++) {
+                if (stopRequested) break;
+                await checkPause(); if(stopRequested) break;
+
+                highlightLine(3);
+                let key = array[i];
+                let j = i - 1;
+                
+                // Visual: Highlight Key (using Pivot Color)
+                const keyBar = document.getElementById(`bar-${i}`);
+                keyBar.classList.add('pivot'); 
+                await sleep(speedSlider.value);
+
+                highlightLine(6);
+                while (j >= 0 && array[j] > key) {
+                    if(stopRequested) break;
+                    await checkPause(); if(stopRequested) break;
+                    
+                    playNote(array[j]);
+                    const barJ = document.getElementById(`bar-${j}`);
+                    const barNext = document.getElementById(`bar-${j+1}`);
+                    
+                    barJ.classList.add('compare');
+                    await sleep(speedSlider.value);
+                    
+                    highlightLine(7);
+                    array[j + 1] = array[j];
+                    
+                    // Visual Swap
+                    barNext.style.height = `${array[j]}%`; 
+                    
+                    barJ.classList.remove('compare');
+                    highlightLine(8);
+                    j = j - 1;
+                }
+                
+                if(stopRequested) break;
+
+                highlightLine(10);
+                array[j + 1] = key;
+                
+                // Visual Place Key
+                const placementBar = document.getElementById(`bar-${j+1}`);
+                placementBar.style.height = `${key}%`;
+                keyBar.classList.remove('pivot'); 
+                
+                // Mark sorted portion visually
+                for(let k=0; k<=i; k++) document.getElementById(`bar-${k}`).classList.add('sorted');
+                await sleep(speedSlider.value);
+            }
+
+            if (!stopRequested) {
+                statusText.innerText = "COMPLETE";
+                statusText.style.color = "var(--accent-green)";
+                updateControls("reset");
+            }
+            highlightLine(12);
+        }
+
+        window.onload = resetArray;
+    </script>
+</body>
+</html>
