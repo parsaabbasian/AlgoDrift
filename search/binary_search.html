@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search</title>
+    <link rel="icon" type="image/svg+xml" href="../logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Default (Dark Mode) Styles */
+        .target-display {
+            background: rgba(255, 255, 255, 0.05); /* Subtle dark background */
+            padding: 10px; border-radius: 8px; margin-bottom: 20px;
+            font-weight: bold; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff; /* White text for dark mode */
+            transition: all 0.3s ease;
+        }
+
+        /* Light Mode Overrides */
+        body.light-mode .target-display {
+            background: #f0f0f0;
+            color: #333333;
+            border: 1px solid #ccc;
+        }
+
+        .bar.mid { background-color: #ffd700 !important; transform: scale(1.1); }
+        .bar.bound { background-color: #2196f3 !important; }
+        .bar.found { background-color: #4caf50 !important; }
+        .bar.ignored { opacity: 0.2; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-link"><span>&#8592;</span> Back</a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <header>
+        <h1>Binary Search</h1>
+        <div class="complexity-stats">
+            <span>Time: O(log n)</span>
+            <span>Space: O(1)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="resetArray()" id="resetBtn">New Sorted List</button>
+        <button onclick="startSearch()" id="startBtn">Binary Search</button>
+        <button onclick="pauseSearch()" id="pauseBtn" disabled>Pause</button>
+        <button onclick="continueSearch()" id="continueBtn" disabled>Resume</button>
+        <div class="speed-control">
+            <span>Fast</span><input type="range" id="speedSlider" min="200" max="1500" value="800"><span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div id="target-display" class="target-display">Target: ?</div>
+            <div class="chart-container" id="chart-container"></div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">binarySearch</span>(arr, target) {</span>
+<span id="line-2" class="code-line">  <span class="kw">let</span> low = 0, high = n - 1;</span>
+<span id="line-3" class="code-line">  <span class="kw">while</span> (low <= high) {</span>
+<span id="line-4" class="code-line">    <span class="kw">let</span> mid = Math.floor((low + high) / 2);</span>
+<span id="line-5" class="code-line">    <span class="kw">if</span> (arr[mid] === target) <span class="kw">return</span> mid;</span>
+<span id="line-6" class="code-line">    <span class="kw">if</span> (arr[mid] < target)</span>
+<span id="line-7" class="code-line">      low = mid + 1;</span>
+<span id="line-8" class="code-line">    <span class="kw">else</span></span>
+<span id="line-9" class="code-line">      high = mid - 1;</span>
+<span id="line-10" class="code-line">  }</span>
+<span id="line-11" class="code-line">  <span class="kw">return</span> -1;</span>
+<span id="line-12" class="code-line">}</span></pre>
+        </div>
+    </div>
+
+    <details class="info-box">
+        <summary>How it Works</summary>
+        <div class="info-content">
+            <p><strong>Concept:</strong> Binary Search is an efficient algorithm for finding an item from a sorted list of items. It works by repeatedly dividing in half the portion of the list that could contain the item.</p>
+            <p><strong>Steps:</strong></p>
+            <ul>
+                <li><strong>Middle:</strong> Compare the target value to the middle element of the array.</li>
+                <li><strong>Match:</strong> If they are equal, the position is returned.</li>
+                <li><strong>Divide:</strong> If the target is less than the middle element, the search continues in the lower half. If greater, it continues in the upper half.</li>
+                <li><strong>Repeat:</strong> This process repeats until the target is found or the search interval is empty.</li>
+            </ul>
+        </div>
+    </details>
+
+    <script>
+        const container = document.getElementById('chart-container');
+        const targetDisplay = document.getElementById('target-display');
+        const statusText = document.getElementById('status-text');
+        const speedSlider = document.getElementById('speedSlider');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const themeBtn = document.getElementById('themeBtn');
+
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerHTML = moonIcon;
+            } else {
+                themeBtn.innerHTML = sunIcon;
+            }
+        }
+
+        let array = [];
+        let target = 0;
+        const ARRAY_SIZE = 25;
+        let isPaused = false;
+        let stopRequested = false;
+        let pauseResolver = null;
+        let audioCtx = null;
+
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function playNote(val, type='sine') {
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(200 + val * 5, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime+0.1);
+        }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        async function checkPause() {
+            if(isPaused) {
+                const prevText = statusText.innerText;
+                statusText.innerText = "PAUSED";
+                await new Promise(r => pauseResolver = r);
+                statusText.innerText = prevText;
+            }
+        }
+
+        function highlightLine(ln) {
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            const l = document.getElementById(`line-${ln}`);
+            if(l) l.classList.add('active-line');
+        }
+
+        function resetArray() {
+            stopRequested = true; 
+            isPaused = false; 
+            if(pauseResolver) pauseResolver();
+            
+            // Reset Button States
+            startBtn.disabled = true;
+            resetBtn.disabled = true;
+            pauseBtn.disabled = true;
+            continueBtn.disabled = true;
+
+            setTimeout(() => {
+                stopRequested = false; container.innerHTML = ''; array = [];
+                
+                let currentVal = 5;
+                for(let i=0; i<ARRAY_SIZE; i++) {
+                    currentVal += Math.floor(Math.random() * 4) + 1;
+                    array.push(currentVal);
+                    const bar = document.createElement('div');
+                    bar.classList.add('bar');
+                    bar.style.height = `${(currentVal/120)*100}%`;
+                    bar.id = `bar-${i}`;
+                    bar.innerText = currentVal;
+                    bar.style.display = 'flex'; bar.style.alignItems = 'flex-end'; 
+                    bar.style.justifyContent = 'center'; bar.style.color = '#fff'; 
+                    bar.style.fontSize = '10px'; bar.style.paddingBottom = '2px';
+                    container.appendChild(bar);
+                }
+
+                target = array[Math.floor(Math.random() * array.length)];
+                targetDisplay.innerText = `Find Target: ${target}`;
+                statusText.innerText = "SORTED & READY";
+                
+                startBtn.disabled = false;
+                resetBtn.disabled = false;
+                
+                highlightLine(0);
+            }, 100);
+        }
+
+        function startSearch() { initAudio(); binarySearch(); }
+        
+        function pauseSearch() { 
+            if(!isPaused) {
+                isPaused = true; 
+                pauseBtn.disabled = true;
+                continueBtn.disabled = false;
+                resetBtn.disabled = false; // ENABLED: User can reset while paused
+            }
+        }
+        
+        function continueSearch() { 
+            if(isPaused) {
+                isPaused = false; 
+                if(pauseResolver) pauseResolver(); 
+                pauseBtn.disabled = false;
+                continueBtn.disabled = true;
+                resetBtn.disabled = true; // DISABLED: Locked again while running
+            }
+        }
+
+        async function binarySearch() {
+            startBtn.disabled = true; 
+            resetBtn.disabled = true;
+            pauseBtn.disabled = false;
+            continueBtn.disabled = true;
+            statusText.innerText = "SEARCHING...";
+
+            let low = 0;
+            let high = array.length - 1;
+            
+            highlightLine(2);
+
+            while (low <= high) {
+                if(stopRequested) break;
+                await checkPause();
+                
+                document.querySelectorAll('.bar').forEach(b => {
+                    b.classList.remove('bound', 'mid');
+                });
+
+                for(let i=0; i<array.length; i++) {
+                    if(i < low || i > high) document.getElementById(`bar-${i}`).classList.add('ignored');
+                    else document.getElementById(`bar-${i}`).classList.remove('ignored');
+                }
+
+                document.getElementById(`bar-${low}`).classList.add('bound');
+                document.getElementById(`bar-${high}`).classList.add('bound');
+                
+                let delay = parseInt(speedSlider.value);
+                await sleep(delay);
+
+                if(stopRequested) break;
+                await checkPause();
+
+                let mid = Math.floor((low + high) / 2);
+                highlightLine(4);
+                
+                let midBar = document.getElementById(`bar-${mid}`);
+                midBar.classList.add('mid');
+                playNote(array[mid], 'triangle');
+                await sleep(delay);
+
+                if(stopRequested) break;
+                await checkPause();
+
+                if (array[mid] === target) {
+                    highlightLine(5);
+                    midBar.classList.remove('mid', 'bound');
+                    midBar.classList.add('found');
+                    midBar.style.backgroundColor = '#4caf50';
+                    statusText.innerText = "TARGET FOUND";
+                    playNote(array[mid] + 50, 'square');
+                    break;
+                }
+
+                highlightLine(6);
+                if (array[mid] < target) {
+                    highlightLine(7);
+                    low = mid + 1;
+                } else {
+                    highlightLine(9);
+                    high = mid - 1;
+                }
+            }
+            
+            resetBtn.disabled = false;
+            pauseBtn.disabled = true;
+            continueBtn.disabled = true;
+        }
+
+        window.onload = resetArray;
+    </script>
+</body>
+</html>

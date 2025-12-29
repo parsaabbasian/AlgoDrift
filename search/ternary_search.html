@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ternary Search</title>
+    <link rel="icon" type="image/svg+xml" href="../logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .target-display {
+            background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; margin-bottom: 20px;
+            font-weight: bold; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;
+        }
+        body.light-mode .target-display { background: #f0f0f0; color: #333; border: 1px solid #ccc; }
+
+        .bar.m1 { background-color: #ff4081 !important; } /* Pink */
+        .bar.m2 { background-color: #00bcd4 !important; } /* Cyan */
+        .bar.bound { background-color: #fff !important; opacity: 0.5; }
+        .bar.found { background-color: #4caf50 !important; }
+        .bar.ignored { opacity: 0.1; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-link"><span>&#8592;</span> Back</a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+
+    <header>
+        <h1>Ternary Search (Peak)</h1>
+        <div class="complexity-stats">
+            <span>Time: O(log₃ n)</span>
+            <span>Space: O(1)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="resetArray()" id="resetBtn">New Mountain</button>
+        <button onclick="startSearch()" id="startBtn">Find Peak</button>
+        <button onclick="pauseSearch()" id="pauseBtn" disabled>Pause</button>
+        <button onclick="continueSearch()" id="continueBtn" disabled>Resume</button>
+        <div class="speed-control">
+            <span>Fast</span><input type="range" id="speedSlider" min="300" max="1500" value="800"><span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div id="target-display" class="target-display">Goal: Find the Peak Element</div>
+            <div class="chart-container" id="chart-container"></div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="line-1" class="code-line"><span class="kw">while</span> (high - low > 2) {</span>
+<span id="line-2" class="code-line">  <span class="kw">let</span> m1 = low + Math.floor((high - low) / 3);</span>
+<span id="line-3" class="code-line">  <span class="kw">let</span> m2 = high - Math.floor((high - low) / 3);</span>
+<span id="line-4" class="code-line">  <span class="kw">if</span> (arr[m1] < arr[m2])</span>
+<span id="line-5" class="code-line">    low = m1; <span class="comment">// Peak is to right of m1</span></span>
+<span id="line-6" class="code-line">  <span class="kw">else</span></span>
+<span id="line-7" class="code-line">    high = m2; <span class="comment">// Peak is to left of m2</span></span>
+<span id="line-8" class="code-line">}</span>
+<span id="line-9" class="code-line"><span class="kw">return</span> max(arr[low], arr[mid], arr[high]);</span></pre>
+        </div>
+    </div>
+
+    <details class="info-box">
+        <summary>How it Works</summary>
+        <div class="info-content">
+            <p><strong>Concept:</strong> Ternary search is a divide-and-conquer algorithm used to find the maximum (or minimum) value in a unimodal list (a list that increases then decreases).</p>
+            <p><strong>Steps:</strong></p>
+            <ul>
+                <li><strong>Divide:</strong> The search space is divided into three parts using two midpoints, <code>m1</code> and <code>m2</code>.</li>
+                <li><strong>Compare:</strong> The values at <code>m1</code> and <code>m2</code> are compared.</li>
+                <li><strong>Reduce:</strong> 
+                    <ul>
+                        <li>If <code>arr[m1] < arr[m2]</code>, the peak cannot be in the left third (before m1), so we move <code>low</code> to <code>m1</code>.</li>
+                        <li>Otherwise, the peak cannot be in the right third (after m2), so we move <code>high</code> to <code>m2</code>.</li>
+                    </ul>
+                </li>
+                <li><strong>Repeat:</strong> This continues until the search space is small enough to check manually.</li>
+            </ul>
+        </div>
+    </details>
+
+    <script>
+        const container = document.getElementById('chart-container');
+        const statusText = document.getElementById('status-text');
+        const speedSlider = document.getElementById('speedSlider');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        
+        // Theme Logic
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerHTML = moonIcon;
+            } else {
+                themeBtn.innerHTML = sunIcon;
+            }
+        }
+
+        let array = [];
+        const ARRAY_SIZE = 30;
+        let isPaused = false; 
+        let stopRequested = false; 
+        let pauseResolver = null; 
+        let audioCtx = null;
+
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function playNote(val, type='sine') {
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(200 + val * 5, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime+0.1);
+        }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        
+        async function checkPause() { 
+            if(isPaused) { 
+                const prevText = statusText.innerText;
+                statusText.innerText="PAUSED"; 
+                await new Promise(r => pauseResolver = r); 
+                statusText.innerText=prevText; 
+            } 
+        }
+
+        function highlightLine(ln) { 
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line')); 
+            const l = document.getElementById(`line-${ln}`); 
+            if(l) l.classList.add('active-line'); 
+        }
+
+        function resetArray() {
+            stopRequested = true; 
+            isPaused = false; 
+            if(pauseResolver) pauseResolver();
+
+            // Reset Button States
+            startBtn.disabled = true;
+            resetBtn.disabled = true;
+            pauseBtn.disabled = true;
+            continueBtn.disabled = true;
+
+            setTimeout(() => {
+                stopRequested = false; container.innerHTML = ''; array = [];
+                
+                // GENERATE MOUNTAIN (PARABOLA)
+                const peakIndex = Math.floor(Math.random() * (ARRAY_SIZE - 10)) + 5;
+                for(let i=0; i<ARRAY_SIZE; i++) {
+                    let dist = Math.abs(i - peakIndex);
+                    let val = 100 - (dist * 4) + (Math.random() * 2);
+                    if(val < 5) val = 5;
+                    array.push(val);
+
+                    const bar = document.createElement('div');
+                    bar.classList.add('bar');
+                    bar.style.height = `${val}%`;
+                    bar.id = `bar-${i}`;
+                    container.appendChild(bar);
+                }
+
+                statusText.innerText = "MOUNTAIN READY";
+                startBtn.disabled = false;
+                resetBtn.disabled = false;
+                highlightLine(0);
+            }, 100);
+        }
+
+        function startSearch() { initAudio(); ternarySearch(); }
+        
+        function pauseSearch() { 
+            if(!isPaused) {
+                isPaused = true; 
+                pauseBtn.disabled = true;
+                continueBtn.disabled = false;
+                resetBtn.disabled = false; // ENABLED
+            }
+        }
+        
+        function continueSearch() { 
+            if(isPaused) {
+                isPaused = false; 
+                if(pauseResolver) pauseResolver(); 
+                pauseBtn.disabled = false;
+                continueBtn.disabled = true;
+                resetBtn.disabled = true; // DISABLED
+            }
+        }
+
+        async function ternarySearch() {
+            startBtn.disabled = true; 
+            resetBtn.disabled = true;
+            pauseBtn.disabled = false; 
+            continueBtn.disabled = true;
+            statusText.innerText = "SEARCHING FOR PEAK...";
+
+            let low = 0, high = array.length - 1;
+            highlightLine(1);
+
+            while (high - low > 2) {
+                if(stopRequested) break;
+                await checkPause(); // Check 1
+
+                document.querySelectorAll('.bar').forEach(b => b.classList.remove('bound', 'm1', 'm2'));
+                for(let i=0; i<array.length; i++) {
+                    if(i < low || i > high) document.getElementById(`bar-${i}`).classList.add('ignored');
+                    else document.getElementById(`bar-${i}`).classList.remove('ignored');
+                }
+                document.getElementById(`bar-${low}`).classList.add('bound');
+                document.getElementById(`bar-${high}`).classList.add('bound');
+
+                let m1 = low + Math.floor((high - low) / 3);
+                let m2 = high - Math.floor((high - low) / 3);
+                
+                let b1 = document.getElementById(`bar-${m1}`);
+                let b2 = document.getElementById(`bar-${m2}`);
+                b1.classList.add('m1');
+                b2.classList.add('m2');
+                
+                highlightLine(2); highlightLine(3);
+                
+                let delay = parseInt(speedSlider.value);
+                playNote(array[m1], 'triangle');
+                await sleep(delay/2);
+
+                if(stopRequested) break;
+                await checkPause(); // Check 2 (Middle of comparison)
+
+                playNote(array[m2], 'triangle');
+                await sleep(delay);
+
+                if(stopRequested) break;
+                await checkPause(); // Check 3
+
+                highlightLine(4);
+                if (array[m1] < array[m2]) {
+                    statusText.innerText = "Peak is right of M1";
+                    highlightLine(5);
+                    low = m1;
+                } else {
+                    statusText.innerText = "Peak is left of M2";
+                    highlightLine(7);
+                    high = m2;
+                }
+            }
+
+            // Final check visualization
+            highlightLine(9);
+            let peak = low;
+            if(array[low+1] > array[peak]) peak = low+1;
+            if(array[high] > array[peak]) peak = high;
+            
+            document.getElementById(`bar-${peak}`).classList.add('found');
+            document.getElementById(`bar-${peak}`).style.backgroundColor = '#4caf50';
+            statusText.innerText = "PEAK FOUND";
+            playNote(array[peak]+50, 'square');
+
+            resetBtn.disabled = false;
+            pauseBtn.disabled = true;
+            continueBtn.disabled = true;
+        }
+
+        window.onload = resetArray;
+    </script>
+</body>
+</html>
