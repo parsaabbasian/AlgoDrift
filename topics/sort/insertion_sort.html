@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merge Sort</title>
-    <link rel="icon" type="image/svg+xml" href="../logo.svg">
-    <link rel="stylesheet" href="style.css">
+    <title>Insertion Sort</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+    <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
 
@@ -28,10 +28,10 @@
     </button>
 
     <header>
-        <h1>Merge Sort</h1>
+        <h1>Insertion Sort</h1>
         <div class="complexity-stats">
-            <span>Time: O(n log n)</span>
-            <span>Space: O(n)</span>
+            <span>Time: O(n²)</span>
+            <span>Space: O(1)</span>
         </div>
     </header>
 
@@ -43,7 +43,7 @@
         
         <div class="speed-control">
             <span>Fast</span>
-            <input type="range" id="speedSlider" min="10" max="500" value="100">
+            <input type="range" id="speedSlider" min="10" max="500" value="200">
             <span>Slow</span>
         </div>
     </div>
@@ -60,19 +60,19 @@
                 </div>
                 <span id="status-text">SYSTEM READY</span>
             </div>
-            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">mergeSort</span>(arr, l, r) {</span><span id="line-2" class="code-line">  <span class="kw">if</span> (l >= r) <span class="kw">return</span>;</span><span id="line-3" class="code-line">  <span class="kw">const</span> m = l + Math.floor((r - l) / 2);</span><span id="line-4" class="code-line">  mergeSort(arr, l, m);</span><span id="line-5" class="code-line">  mergeSort(arr, m + 1, r);</span><span id="line-6" class="code-line">  merge(arr, l, m, r);</span><span id="line-7" class="code-line">}</span><span id="line-8" class="code-line"> </span><span id="line-9" class="code-line"><span class="kw">function</span> <span class="func">merge</span>(arr, l, m, r) {</span><span id="line-10" class="code-line">  <span class="comment">// Copy data to temp arrays</span></span><span id="line-11" class="code-line">  <span class="comment">// Merge back to arr[l..r]</span></span><span id="line-12" class="code-line">}</span></pre>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">insertionSort</span>(arr) {</span><span id="line-2" class="code-line">  <span class="kw">for</span> (<span class="kw">let</span> i = 1; i < arr.length; i++) {</span><span id="line-3" class="code-line">    <span class="kw">let</span> key = arr[i];</span><span id="line-4" class="code-line">    <span class="kw">let</span> j = i - 1;</span><span id="line-5" class="code-line">    <span class="comment">// Move elements > key</span></span><span id="line-6" class="code-line">    <span class="kw">while</span> (j >= 0 && arr[j] > key) {</span><span id="line-7" class="code-line">      arr[j + 1] = arr[j];</span><span id="line-8" class="code-line">      j--;</span><span id="line-9" class="code-line">    }</span><span id="line-10" class="code-line">    arr[j + 1] = key;</span><span id="line-11" class="code-line">  }</span><span id="line-12" class="code-line">}</span></pre>
         </div>
     </div>
 
     <details class="info-box">
         <summary>How it Works</summary>
         <div class="info-content">
-            <p><strong>Concept:</strong> Merge Sort is a divide-and-conquer algorithm. It divides the input array into two halves, recursively sorts them, and then merges the two sorted halves.</p>
+            <p><strong>Concept:</strong> Insertion Sort builds the sorted array one item at a time. It is much like sorting playing cards in your hand.</p>
             <p><strong>Steps:</strong></p>
             <ul>
-                <li><strong>Divide:</strong> Find the middle point to divide the array into two halves.</li>
-                <li><strong>Conquer:</strong> Recursively call mergeSort for the first half and the second half.</li>
-                <li><strong>Combine:</strong> Merge the two halves sorted in step 2. This is where the actual sorting happens as elements are put back in order.</li>
+                <li><strong>Pick Key:</strong> It starts from the second element (the key) and compares it with the elements before it.</li>
+                <li><strong>Shift:</strong> If the key is smaller than the previous element, it shifts the previous element to the right.</li>
+                <li><strong>Insert:</strong> This repeats until the correct position for the key is found, and it is inserted there.</li>
             </ul>
         </div>
     </details>
@@ -88,7 +88,7 @@
         const themeBtn = document.getElementById('themeBtn');
         
         let array = [];
-        const ARRAY_SIZE = 40;
+        const ARRAY_SIZE = 20;
         let audioCtx = null;
         let stopRequested = false;
         let isPaused = false;
@@ -107,14 +107,13 @@
             }
         }
 
-        function playNote(value, type = 'sine') {
+        function playNote(value) {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             const frequency = 200 + (value * 6);
-            osc.type = type;
             osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
@@ -176,7 +175,7 @@
             statusText.innerText = "RUNNING";
             statusText.style.color = "var(--accent-green)";
             updateControls("running");
-            runMergeSort();
+            insertionSort();
         }
 
         function pauseSort() {
@@ -216,103 +215,70 @@
             }
         }
 
-        async function runMergeSort() {
-            initAudio();
-            await mergeSort(0, array.length - 1);
+        async function insertionSort() {
+            initAudio(); 
+            highlightLine(1);
+            
+            const n = array.length;
+            
+            highlightLine(2); 
+            for (let i = 1; i < n; i++) {
+                if (stopRequested) break;
+                await checkPause(); if(stopRequested) break;
+
+                highlightLine(3);
+                let key = array[i];
+                let j = i - 1;
+                
+                // Visual: Highlight Key (using Pivot Color)
+                const keyBar = document.getElementById(`bar-${i}`);
+                keyBar.classList.add('pivot'); 
+                await sleep(speedSlider.value);
+
+                highlightLine(6);
+                while (j >= 0 && array[j] > key) {
+                    if(stopRequested) break;
+                    await checkPause(); if(stopRequested) break;
+                    
+                    playNote(array[j]);
+                    const barJ = document.getElementById(`bar-${j}`);
+                    const barNext = document.getElementById(`bar-${j+1}`);
+                    
+                    barJ.classList.add('compare');
+                    await sleep(speedSlider.value);
+                    
+                    highlightLine(7);
+                    array[j + 1] = array[j];
+                    
+                    // Visual Swap
+                    barNext.style.height = `${array[j]}%`; 
+                    
+                    barJ.classList.remove('compare');
+                    highlightLine(8);
+                    j = j - 1;
+                }
+                
+                if(stopRequested) break;
+
+                highlightLine(10);
+                array[j + 1] = key;
+                
+                // Visual Place Key
+                const placementBar = document.getElementById(`bar-${j+1}`);
+                placementBar.style.height = `${key}%`;
+                keyBar.classList.remove('pivot'); 
+                
+                // Mark sorted portion visually
+                for(let k=0; k<=i; k++) document.getElementById(`bar-${k}`).classList.add('sorted');
+                await sleep(speedSlider.value);
+            }
+
             if (!stopRequested) {
                 statusText.innerText = "COMPLETE";
                 statusText.style.color = "var(--accent-green)";
-                for(let i = 0; i < array.length; i++) {
-                    document.getElementById(`bar-${i}`).classList.add('sorted');
-                }
                 updateControls("reset");
             }
-        }
-
-        async function mergeSort(l, r) {
-            if (l >= r || stopRequested) return;
-            
-            await checkPause(); if(stopRequested) return;
-            highlightLine(1); highlightLine(2);
-            
-            const m = l + Math.floor((r - l) / 2);
-            
-            highlightLine(4); 
-            await mergeSort(l, m);
-            await checkPause(); if(stopRequested) return; // Check after recursive call
-
-            highlightLine(5); 
-            await mergeSort(m + 1, r);
-            await checkPause(); if(stopRequested) return; // Check after recursive call
-
-            highlightLine(6); 
-            await merge(l, m, r);
-        }
-
-        async function merge(l, m, r) {
-            if (stopRequested) return;
-            highlightLine(9);
-            
-            const n1 = m - l + 1;
-            const n2 = r - m;
-            let L = new Array(n1);
-            let R = new Array(n2);
-
-            // Highlight sub-arrays being merged
-            for (let i = 0; i < n1; i++) {
-                L[i] = array[l + i];
-                const bar = document.getElementById(`bar-${l+i}`);
-                if(bar) bar.classList.add('active');
-            }
-            for (let j = 0; j < n2; j++) {
-                R[j] = array[m + 1 + j];
-                const bar = document.getElementById(`bar-${m+1+j}`);
-                if(bar) bar.classList.add('active');
-            }
-            
-            await sleep(speedSlider.value);
-            
-            let i = 0, j = 0, k = l;
-
-            while (i < n1 && j < n2) {
-                await checkPause(); if(stopRequested) return;
-                playNote(array[k]);
-                
-                if (L[i] <= R[j]) {
-                    array[k] = L[i];
-                    i++;
-                } else {
-                    array[k] = R[j];
-                    j++;
-                }
-                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
-                await sleep(speedSlider.value);
-                k++;
-            }
-
-            while (i < n1) {
-                await checkPause(); if(stopRequested) return;
-                array[k] = L[i];
-                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
-                i++;
-                k++;
-                await sleep(speedSlider.value);
-            }
-
-            while (j < n2) {
-                await checkPause(); if(stopRequested) return;
-                array[k] = R[j];
-                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
-                j++;
-                k++;
-                await sleep(speedSlider.value);
-            }
-
-            // Remove highlight
-            for (let x = l; x <= r; x++) {
-                const bar = document.getElementById(`bar-${x}`);
-                if(bar) bar.classList.remove('active');
-            }
+            highlightLine(12);
         }
 
         window.onload = resetArray;

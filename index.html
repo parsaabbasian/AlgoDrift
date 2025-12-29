@@ -1,16 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlgoDrift</title>
     
-    <meta name="description" content="Interactive visualizations for computer science sorting algorithms. Analyze time and space complexity.">
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <meta name="google-site-verification" content="BmxFnRu23zvtpXF-6fZk8O7Rn4XfuOBjHmvbYhSKAWk" />
+    <title>AlgoDrift | Interactive Algorithm Visualizations & Complexity Analysis</title>
+    <meta name="title" content="AlgoDrift | Interactive Algorithm Visualizations & Complexity Analysis">
+    <meta name="description" content="Master computer science with AlgoDrift. Interactive visualizations for sorting, searching, and tree algorithms with real-time Big O analysis.">
+    <meta name="keywords" content="algorithms, data structures, visualization, sorting algorithms, Big O, binary search, tree traversal, CS learning, AlgoDrift">
+    <meta name="author" content="Parsa Abbasian">
+    <meta name="robots" content="index, follow">
 
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://algodrift.vercel.app/">
+    <meta property="og:title" content="AlgoDrift | Visualizing Computer Science">
+    <meta property="og:description" content="Interactive algorithm visualizers. Analyze time and space complexity step-by-step.">
+    <meta property="og:image" content="https://algodrift.vercel.app/assets/img/og-preview.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://algodrift.vercel.app/">
+    <meta property="twitter:title" content="AlgoDrift | Algorithm Library">
+    <meta property="twitter:description" content="Step-by-step logic and complexity analysis for CS students.">
+    <meta property="twitter:image" content="https://algodrift.vercel.app/assets/img/og-preview.png">
+
+    <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+    <link rel="canonical" href="https://algodrift.vercel.app/">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AlgoDrift",
+      "description": "Interactive library for visualizing computer science algorithms and data structures.",
+      "url": "https://algodrift.vercel.app",
+      "applicationCategory": "EducationalApplication",
+      "creator": {
+        "@type": "Person",
+        "name": "Parsa Abbasian"
+      }
+    }
+    </script>
     <style>
         /* --- DASHBOARD LAYOUT --- */
         body {
@@ -43,6 +75,7 @@
             align-items: center;
             gap: 12px;
             letter-spacing: -0.5px;
+            text-decoration: none;
         }
         
         .brand-logo { width: 32px; height: 32px; display: block; }
@@ -80,7 +113,7 @@
             transform: translateX(4px);
         }
 
-        /* Active State Style (Purple) */
+        /* Active State Style (Purple) - Triggered via JS only */
         .menu-link.active {
             background-color: rgba(99, 102, 241, 0.08);
             color: var(--bar-color);
@@ -107,7 +140,6 @@
             position: relative;
         }
 
-        /* Theme Toggle Positioned Top-Right */
         .theme-toggle {
             position: absolute;
             top: 30px;
@@ -118,7 +150,6 @@
         .hero-header {
             padding: 60px 50px 40px 50px;
             background: linear-gradient(180deg, var(--card-bg) 0%, transparent 100%);
-            border-bottom: 1px solid transparent;
             margin-bottom: 20px;
             padding-right: 100px;
         }
@@ -139,7 +170,7 @@
 
         /* --- SECTIONS --- */
         .content-container {
-            padding: 0 50px 60px 50px;
+            padding: 0 50px 30px 50px;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -168,8 +199,6 @@
             background-color: var(--accent-green);
             box-shadow: 0 0 8px var(--accent-green);
         }
-        
-        .status-dot.orange { background-color: var(--accent-pivot); box-shadow: 0 0 8px var(--accent-pivot); }
 
         /* --- CARDS --- */
         .grid {
@@ -190,7 +219,6 @@
             flex-direction: column;
             height: 200px;
             position: relative;
-            overflow: hidden;
         }
 
         .card:hover {
@@ -213,7 +241,6 @@
             color: var(--text-primary);
         }
 
-        /* SVG Icon Box Style */
         .icon-box {
             width: 42px;
             height: 42px;
@@ -224,12 +251,6 @@
             justify-content: center;
             color: var(--bar-color);
             border: 1px solid var(--border-color);
-        }
-        
-        .icon-box svg {
-            width: 20px;
-            height: 20px;
-            stroke-width: 2;
         }
 
         .card p {
@@ -244,7 +265,6 @@
             margin-top: auto;
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
         }
 
         .chip {
@@ -259,10 +279,21 @@
         .chip.time { color: var(--accent-red); background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.15); }
         .chip.good-time { color: var(--accent-green); background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15); }
         .chip.space { color: #60a5fa; background: rgba(96, 165, 250, 0.08); border-color: rgba(96, 165, 250, 0.15); }
-        .chip.soon { color: var(--text-secondary); background: var(--btn-bg); border-color: var(--border-color); }
 
-        .card.disabled { opacity: 0.6; cursor: default; border-style: dashed; }
-        .card.disabled:hover { transform: none; border-color: var(--border-color); box-shadow: none; }
+        /* --- FOOTER --- */
+        .main-footer {
+            margin-top: 60px;
+            padding-bottom: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .main-footer a {
+            color: var(--bar-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
 
         @media (max-width: 1024px) {
             body { flex-direction: column; overflow: auto; }
@@ -270,21 +301,31 @@
             .main-view { height: auto; }
             .hero-header { padding: 30px; }
             .content-container { padding: 0 30px 40px 30px; }
-            .theme-toggle { top: 20px; right: 20px; }
         }
     </style>
 </head>
 <body>
 
     <nav class="sidebar">
-        <div class="brand">
-            <img src="logo.svg" alt="AlgoDrift Logo" class="brand-logo">
+        <a href="#" class="brand">
+            <img src="assets/img/logo.svg" alt="AlgoDrift Logo" class="brand-logo">
             AlgoDrift
-        </div>
-
+        </a>
+        <div class="menu-label">Data Structures</div>
+        <a href="#array" class="menu-link">
+            <span>Arrays</span>
+            <span class="badge-count">1</span>
+        </a>
+        <a href="#link_list" class="menu-link">
+            <span>Linked Lists</span>
+            <span class="badge-count">1</span>
+        </a>
+        <a href="#tree" class="menu-link">
+            <span>Trees</span>
+            <span class="badge-count">2</span>
+        </a>
         <div class="menu-label">Algorithms</div>
-        
-        <a href="#sorting" class="menu-link active">
+        <a href="#sorting" class="menu-link">
             <span>Sorting</span>
             <span class="badge-count">5</span>
         </a>
@@ -292,76 +333,77 @@
             <span>Search</span>
             <span class="badge-count">4</span>
         </a>
-        <a href="#recursion" class="menu-link">
-            <span>Recursion</span>
-            <span class="badge-count">2</span>
-        </a>
-        <a href="#pathfinding" class="menu-link">
-            <span>Pathfinding</span>
-            <span class="badge-count">2</span>
-        </a>
-
         <div style="flex: 1;"></div>
     </nav>
 
     <main class="main-view">
-        
         <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn"></button>
-
         <div class="hero-header">
             <h1>Algorithm Library</h1>
             <p>Interactive visualizations for computer science algorithms. Analyze time complexity, space complexity, and step-by-step logic.</p>
         </div>
-
         <div class="content-container">
-            
-            <div class="section-header" id="sorting">
+            <div class="section-header" id="array">
+                <div class="status-dot"></div>
+                <h2>Arrays</h2>
+            </div>
+            <div class="grid">
+                <a href="topics/array/operations.html" class="card">
+                    <div class="card-top">
+                        <h3>Array Operations</h3>
+                        <div class="icon-box">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+                        </div>
+                    </div>
+                    <p>Contiguous memory structures. Basic indexing, search, and memory management.</p>
+                    <div class="card-footer"><span class="chip time">O(n)</span><span class="chip space">O(1)</span></div>
+                </a>
+            </div>
+
+            <div class="section-header" id="link_list" style="margin-top: 60px;">
+                <div class="status-dot"></div>
+                <h2>Linked Lists</h2>
+            </div>
+            <div class="grid">
+                <a href="topics/link_list/linked_list.html" class="card">
+                    <div class="card-top">
+                        <h3>Singly Linked List</h3>
+                        <div class="icon-box">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        </div>
+                    </div>
+                    <p>Nodes and pointers. Dynamic memory allocation with insertion and traversal.</p>
+                    <div class="card-footer"><span class="chip time">O(n)</span><span class="chip space">O(n)</span></div>
+                </a>
+            </div>
+
+            <div class="section-header" id="sorting" style="margin-top: 60px;">
                 <div class="status-dot"></div>
                 <h2>Sorting Algorithms</h2>
             </div>
-
             <div class="grid">
-                <a href="sort/bubble_sort.html" class="card">
-                    <div class="card-top">
-                        <h3>Bubble Sort</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg></div>
-                    </div>
+                <a href="topics/sort/bubble_sort.html" class="card">
+                    <div class="card-top"><h3>Bubble Sort</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg></div></div>
                     <p>Repeatedly steps through the list, swaps adjacent elements if they are in the wrong order.</p>
                     <div class="card-footer"><span class="chip time">O(n²)</span><span class="chip space">O(1)</span></div>
                 </a>
-
-                <a href="sort/insertion_sort.html" class="card">
-                    <div class="card-top">
-                        <h3>Insertion Sort</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div>
-                    </div>
+                <a href="topics/sort/insertion_sort.html" class="card">
+                    <div class="card-top"><h3>Insertion Sort</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></div></div>
                     <p>Builds the final sorted array one item at a time, efficient for small data sets.</p>
                     <div class="card-footer"><span class="chip time">O(n²)</span><span class="chip space">O(1)</span></div>
                 </a>
-
-                <a href="sort/selection_sort.html" class="card">
-                    <div class="card-top">
-                        <h3>Selection Sort</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg></div>
-                    </div>
+                <a href="topics/sort/selection_sort.html" class="card">
+                    <div class="card-top"><h3>Selection Sort</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg></div></div>
                     <p>Divides the input list into two parts: sorted and unsorted, picking the minimum.</p>
                     <div class="card-footer"><span class="chip time">O(n²)</span><span class="chip space">O(1)</span></div>
                 </a>
-
-                <a href="sort/merge_sort.html" class="card">
-                    <div class="card-top">
-                        <h3>Merge Sort</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg></div>
-                    </div>
+                <a href="topics/sort/merge_sort.html" class="card">
+                    <div class="card-top"><h3>Merge Sort</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg></div></div>
                     <p>Divide and conquer algorithm that splits the array and merges sorted subarrays.</p>
                     <div class="card-footer"><span class="chip good-time">O(n log n)</span><span class="chip space">O(n)</span></div>
                 </a>
-
-                <a href="sort/quick_sort.html" class="card">
-                    <div class="card-top">
-                        <h3>Quick Sort</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-                    </div>
+                <a href="topics/sort/quick_sort.html" class="card">
+                    <div class="card-top"><h3>Quick Sort</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div></div>
                     <p>Picks a pivot element and partitions the array around the pivot.</p>
                     <div class="card-footer"><span class="chip good-time">O(n log n)</span><span class="chip space">O(log n)</span></div>
                 </a>
@@ -371,130 +413,70 @@
                 <div class="status-dot"></div>
                 <h2>Search Algorithms</h2>
             </div>
-
             <div class="grid">
-                <a href="search/linear_search.html" class="card">
-                    <div class="card-top">
-                        <h3>Linear Search</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
-                    </div>
+                <a href="topics/search/linear_search.html" class="card">
+                    <div class="card-top"><h3>Linear Search</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div></div>
                     <p>Sequentially checks each element of the list until a match is found.</p>
                     <div class="card-footer"><span class="chip time">O(n)</span><span class="chip space">O(1)</span></div>
                 </a>
-                
-                <a href="search/binary_search.html" class="card">
-                    <div class="card-top">
-                        <h3>Binary Search</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line></svg></div>
-                    </div>
+                <a href="topics/search/binary_search.html" class="card">
+                    <div class="card-top"><h3>Binary Search</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line></svg></div></div>
                     <p>Search a sorted array by repeatedly dividing the search interval in half.</p>
                     <div class="card-footer"><span class="chip good-time">O(log n)</span><span class="chip space">O(1)</span></div>
                 </a>
-
-                <a href="search/rotated_search.html" class="card">
-                    <div class="card-top">
-                        <h3>Search in Rotated</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg></div>
-                    </div>
+                <a href="topics/search/rotated_search.html" class="card">
+                    <div class="card-top"><h3>Search in Rotated</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg></div></div>
                     <p>Finds an element in a sorted array that has been rotated at some pivot.</p>
                     <div class="card-footer"><span class="chip good-time">O(log n)</span><span class="chip space">O(1)</span></div>
                 </a>
-
-                <a href="search/ternary_search.html" class="card">
-                    <div class="card-top">
-                        <h3>Ternary Search</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l-10 10h20z"/><path d="M12 22v-10"/></svg></div>
-                    </div>
+                <a href="topics/search/ternary_search.html" class="card">
+                    <div class="card-top"><h3>Ternary Search</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l-10 10h20z"/><path d="M12 22v-10"/></svg></div></div>
                     <p>Determines the maximum or minimum of a unimodal function/array.</p>
                     <div class="card-footer"><span class="chip good-time">O(log₃ n)</span><span class="chip space">O(1)</span></div>
                 </a>
             </div>
 
-            <div class="section-header" id="recursion" style="margin-top: 60px;">
-                <div class="status-dot orange"></div>
-                <h2>Recursion Algorithms <span style="opacity: 0.5; font-weight: 400; font-size: 0.9rem; margin-left: 10px;">(Coming Soon)</span></h2>
+            <div class="section-header" id="tree" style="margin-top: 60px;">
+                <div class="status-dot"></div>
+                <h2>Tree Algorithms</h2>
             </div>
-
             <div class="grid">
-                <div class="card disabled">
-                    <div class="card-top">
-                        <h3>Tower of Hanoi</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg></div>
-                    </div>
-                    <p>Classic puzzle solving game using recursive logic.</p>
-                    <div class="card-footer"><span class="chip soon">In Development</span></div>
-                </div>
-                <div class="card disabled">
-                    <div class="card-top">
-                        <h3>N-Queens</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg></div>
-                    </div>
-                    <p>Placing N chess queens on an N×N chessboard.</p>
-                    <div class="card-footer"><span class="chip soon">In Development</span></div>
-                </div>
+                <a href="topics/tree/tree_traversal.html" class="card">
+                    <div class="card-top"><h3>Tree Traversal</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H14.76a2 2 0 0 1 1.79 1.1L18 14"/><circle cx="12" cy="7" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/></svg></div></div>
+                    <p>Hierarchical structures. DFS (In-order, Pre-order, Post-order) and BFS logic.</p>
+                    <div class="card-footer"><span class="chip time">O(n)</span><span class="chip space">O(h)</span></div>
+                </a>
+                <a href="topics/tree/tree_metric.html" class="card">
+                    <div class="card-top"><h3>Tree Metrics</h3><div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg></div></div>
+                    <p>Calculate height, depth, and size of binary search trees.</p>
+                    <div class="card-footer"><span class="chip time">O(n)</span><span class="chip space">O(1)</span></div>
+                </a>
             </div>
 
-            <div class="section-header" id="pathfinding" style="margin-top: 60px;">
-                <div class="status-dot orange"></div>
-                <h2>Pathfinding <span style="opacity: 0.5; font-weight: 400; font-size: 0.9rem; margin-left: 10px;">(Coming Soon)</span></h2>
-            </div>
-
-            <div class="grid">
-                <div class="card disabled">
-                    <div class="card-top">
-                        <h3>Dijkstra's Algo</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
-                    </div>
-                    <p>Finds the shortest paths between nodes in a graph.</p>
-                    <div class="card-footer"><span class="chip soon">In Development</span></div>
-                </div>
-                <div class="card disabled">
-                    <div class="card-top">
-                        <h3>A* Search</h3>
-                        <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
-                    </div>
-                    <p>Advanced graph traversal using heuristics for performance.</p>
-                    <div class="card-footer"><span class="chip soon">In Development</span></div>
-                </div>
-            </div>
-
+            <footer class="main-footer">
+                <p>&copy; 2025 AlgoDrift. Developed by <a href="https://parsaabbasian.vercel.app/" target="_blank">Parsa Abbasian</a></p>
+            </footer>
         </div>
     </main>
 
     <script>
-        // --- THEME LOGIC ---
         const themeBtn = document.getElementById('themeBtn');
         const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-
         updateIcon(false); 
-
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
             updateIcon(isLight);
         }
-
-        function updateIcon(isLight) {
-            if (isLight) {
-                themeBtn.innerHTML = moonIcon;
-            } else {
-                themeBtn.innerHTML = sunIcon;
-            }
-        }
-
-        // --- ACTIVE MENU LOGIC ---
+        function updateIcon(isLight) { themeBtn.innerHTML = isLight ? moonIcon : sunIcon; }
         const menuLinks = document.querySelectorAll('.menu-link');
-        
         menuLinks.forEach(link => {
             link.addEventListener('click', function() {
-                // Remove active class from all
                 menuLinks.forEach(l => l.classList.remove('active'));
-                // Add active class to clicked
                 this.classList.add('active');
             });
         });
     </script>
-
 </body>
 </html>

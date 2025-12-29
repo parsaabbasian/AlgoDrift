@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked List Visualizer</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Specific styles for Linked List nodes to fit the existing theme */
+        .chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            overflow-x: auto;
+            gap: 0; /* Managed by arrows */
+        }
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+        .node-rect {
+            width: 80px;
+            height: 60px;
+            background: var(--bg-card);
+            border: 2px solid var(--accent-pivot);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .node-data {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--accent-pivot);
+        }
+        .node-next {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.7rem;
+            text-align: center;
+            line-height: 20px;
+        }
+        .pointer-arrow {
+            width: 40px;
+            height: 2px;
+            background: var(--accent-pivot);
+            position: relative;
+            margin: 0 5px;
+        }
+        .pointer-arrow::after {
+            content: '▶';
+            position: absolute;
+            right: -5px;
+            top: -9px;
+            color: var(--accent-pivot);
+            font-size: 12px;
+        }
+        .active-node {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px var(--accent-green);
+            transform: translateY(-10px);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="nav-link">
+        <span>&#8592;</span> Back
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <header>
+        <h1>Linked List Traversal</h1>
+        <div class="complexity-stats">
+            <span>Time: O(n)</span>
+            <span>Space: O(1)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="resetArray()" id="resetBtn">New Node</button>
+        <button onclick="startSort()" id="startBtn">Traverse</button>
+        <button onclick="pauseSort()" id="pauseBtn" disabled>Pause</button>
+        <button onclick="continueSort()" id="continueBtn" disabled>Resume</button>
+        
+        <div class="speed-control">
+            <span>Fast</span>
+            <input type="range" id="speedSlider" min="10" max="800" value="400">
+            <span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div class="chart-container" id="chart-container"></div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                </div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">traverse</span>(head) {</span><span id="line-2" class="code-line">  <span class="kw">let</span> current = head;</span><span id="line-3" class="code-line">  <span class="kw">while</span> (current !== <span class="kw">null</span>) {</span><span id="line-4" class="code-line">    <span class="comment">// Accessing current node</span></span><span id="line-5" class="code-line">    visit(current.data);</span><span id="line-6" class="code-line">    <span class="comment">// Move to next pointer</span></span><span id="line-7" class="code-line">    current = current.next;</span><span id="line-8" class="code-line">  }</span><span id="line-9" class="code-line">}</span></pre>
+        </div>
+    </div>
+
+    
+
+    <details class="info-box">
+        <summary>How it Works</summary>
+        <div class="info-content">
+            <p><strong>Node Structure:</strong> Each element is a 'Node' containing data and a pointer (next) to the next node in the sequence.</p>
+            <p><strong>Traversal:</strong> Unlike arrays, you cannot jump to a specific index. You must start at the <strong>Head</strong> and follow the pointers.</p>
+            <p><strong>Linear Search:</strong> To find a value, you iterate through the list until the <code>next</code> pointer is <code>null</code>.</p>
+        </div>
+    </details>
+
+    <script>
+        const container = document.getElementById('chart-container');
+        const sortBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const statusText = document.getElementById('status-text');
+        const themeBtn = document.getElementById('themeBtn');
+        
+        let listData = [];
+        const MAX_NODES = 8;
+        let audioCtx = null;
+        let stopRequested = false;
+        let isPaused = false;
+        let pauseResolver = null;
+
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            themeBtn.innerHTML = document.body.classList.contains('light-mode') ? moonIcon : sunIcon;
+        }
+
+        function playNote(value) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.frequency.setValueAtTime(200 + (value * 5), audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode).connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function highlightLine(num) {
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            const line = document.getElementById(`line-${num}`);
+            if (line) line.classList.add('active-line');
+        }
+
+        async function checkPause() {
+            if (isPaused) {
+                statusText.innerText = "PAUSED";
+                await new Promise(resolve => { pauseResolver = resolve; });
+                statusText.innerText = "RUNNING";
+            }
+        }
+
+        function resetArray() {
+            stopRequested = true;
+            isPaused = false;
+            if (pauseResolver) pauseResolver();
+
+            setTimeout(() => {
+                stopRequested = false;
+                if(listData.length >= MAX_NODES) listData = [];
+                listData.push(Math.floor(Math.random() * 90) + 10);
+                renderList();
+                updateControls("reset");
+                statusText.innerText = "SYSTEM READY";
+            }, 50);
+        }
+
+        function renderList(activeIdx = -1) {
+            container.innerHTML = '';
+            listData.forEach((val, i) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'node-wrapper';
+                wrapper.id = `node-${i}`;
+                
+                const node = document.createElement('div');
+                node.className = `node-rect ${i === activeIdx ? 'active-node' : ''}`;
+                node.innerHTML = `<div class="node-data">${val}</div><div class="node-next">${i === listData.length - 1 ? 'NULL' : 'NEXT'}</div>`;
+                
+                wrapper.appendChild(node);
+                if(i < listData.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'pointer-arrow';
+                    wrapper.appendChild(arrow);
+                }
+                container.appendChild(wrapper);
+            });
+        }
+
+        function startSort() {
+            if(listData.length === 0) return;
+            stopRequested = false;
+            updateControls("running");
+            traverseList();
+        }
+
+        async function traverseList() {
+            initAudio();
+            highlightLine(2);
+            statusText.innerText = "TRAVERSING...";
+            
+            for(let i = 0; i < listData.length; i++) {
+                if(stopRequested) break;
+                await checkPause();
+
+                highlightLine(3); // While current != null
+                renderList(i);
+                playNote(listData[i]);
+                
+                await sleep(speedSlider.value);
+                highlightLine(5); // Visit
+                await sleep(speedSlider.value / 2);
+                
+                highlightLine(7); // current = current.next
+                await sleep(speedSlider.value / 2);
+            }
+
+            if(!stopRequested) {
+                statusText.innerText = "COMPLETE";
+                highlightLine(9);
+                updateControls("reset");
+            }
+        }
+
+        function updateControls(state) {
+            sortBtn.disabled = state === "running" || state === "paused";
+            resetBtn.disabled = state === "running";
+            pauseBtn.disabled = state !== "running";
+            continueBtn.disabled = state !== "paused";
+        }
+
+        function pauseSort() { isPaused = true; updateControls("paused"); }
+        function continueSort() { isPaused = false; if(pauseResolver) pauseResolver(); updateControls("running"); }
+
+        window.onload = () => { listData = [10, 25, 40]; renderList(); };
+    </script>
+</body>
+</html>

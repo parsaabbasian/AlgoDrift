@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Operations</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Array Specific Styles */
+        .chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            background: var(--card-bg);
+            overflow-x: auto;
+            padding: 40px;
+        }
+
+        .array-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Indices and Addresses */
+        .cell-index {
+            position: absolute;
+            top: -25px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .cell-address {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.7rem;
+            color: var(--accent-pivot);
+            font-family: 'Fira Code', monospace;
+            opacity: 0.7;
+        }
+
+        /* States */
+        .array-cell.shifting { border-color: #ffd700; transform: translateY(-10px); }
+        .array-cell.new { background-color: #4caf50; border-color: #4caf50; color: white; }
+        .array-cell.deleted { background-color: #ef4444; border-color: #ef4444; color: white; opacity: 0; }
+        .array-cell.access { background-color: #2196f3; border-color: #2196f3; color: white; }
+
+        /* Control Group Layout */
+        .control-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .separator {
+            width: 1px;
+            height: 40px;
+            background: var(--border-color);
+            margin: 0 5px;
+        }
+
+        /* Labeled Input Styling */
+        .labeled-input {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .labeled-input label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 600;
+            margin-left: 2px;
+        }
+        
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            width: 70px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: border 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-pivot);
+        }
+
+        /* --- BUTTON STYLING (MATCHING THEME) --- */
+        /* Explicitly style these buttons to match the Reset button and Dark Mode theme */
+        #insertBtn, #deleteBtn, #accessBtn {
+            background-color: var(--btn-bg); /* Uses theme variable */
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #insertBtn:hover, #deleteBtn:hover, #accessBtn:hover {
+            background-color: var(--bg-secondary);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+        }
+
+        #insertBtn:disabled, #deleteBtn:disabled, #accessBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="nav-link">
+        <span>&#8592;</span> Back
+    </a>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+
+    <header>
+        <h1>Array Operations</h1>
+        <div class="complexity-stats">
+            <span>Access: O(1)</span>
+            <span>Insert/Delete: O(n)</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <div class="control-group">
+            <button onclick="resetArray()" id="resetBtn">Reset</button>
+            
+            <div class="separator"></div>
+            
+            <div class="labeled-input">
+                <label for="idxInput">Index</label>
+                <input type="number" id="idxInput" min="0" max="7" value="2">
+            </div>
+            
+            <div class="labeled-input">
+                <label for="valInput">Value</label>
+                <input type="number" id="valInput" min="0" max="99" value="99">
+            </div>
+            
+            <div class="separator"></div>
+
+            <button onclick="handleOp('insert')" id="insertBtn">Insert</button>
+            <button onclick="handleOp('delete')" id="deleteBtn">Delete</button>
+            <button onclick="handleOp('access')" id="accessBtn">Access</button>
+        </div>
+        
+        <div class="speed-control" style="margin-top: 15px;">
+            <span>Fast</span>
+            <input type="range" id="speedSlider" min="200" max="1500" value="600">
+            <span>Slow</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <div class="array-wrapper" id="array-container"></div>
+            </div>
+        </div>
+
+        <div class="code-window">
+            <div class="window-header">
+                <div class="dots">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                </div>
+                <span id="status-text">SYSTEM READY</span>
+            </div>
+            <pre><span id="code-block" class="code-line">// Select an operation to see logic</span></pre>
+        </div>
+    </div>
+
+    <details class="info-box">
+        <summary>Memory & Operations</summary>
+        <div class="info-content">
+            <p><strong>Contiguous Memory:</strong> Arrays are stored in sequential memory blocks. Notice how the addresses (e.g., 0x100, 0x104) increase by 4 bytes for each integer.</p>
+            <ul>
+                <li><strong>Access O(1):</strong> Because memory is contiguous, the computer calculates the exact address using: <code>Base + (Index * 4)</code>.</li>
+                <li><strong>Insertion O(n):</strong> Inserting an element requires <strong>shifting</strong> all subsequent elements to the right to make space.</li>
+                <li><strong>Deletion O(n):</strong> Deleting an element requires <strong>shifting</strong> all subsequent elements to the left to fill the gap.</li>
+            </ul>
+        </div>
+    </details>
+
+<script>
+        const container = document.getElementById('array-container');
+        const statusText = document.getElementById('status-text');
+        const codeBlock = document.getElementById('code-block');
+        const themeBtn = document.getElementById('themeBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const idxInput = document.getElementById('idxInput');
+        const valInput = document.getElementById('valInput');
+
+        // --- THEME LOGIC ---
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            themeBtn.innerHTML = document.body.classList.contains('light-mode') ? moonIcon : sunIcon;
+        }
+
+        // --- ARRAY LOGIC ---
+        let array = [10, 20, 30, 40, 50];
+        const CAPACITY = 8;
+        let isRunning = false;
+        let audioCtx = null;
+
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        
+        function playNote(freq) {
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime+0.1);
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // Helper: Updates number only, preserves labels
+        function updateCellVisual(index, newValue) {
+            const cell = document.getElementById(`cell-${index}`);
+            if (cell) {
+                const valSpan = cell.querySelector('.val-span');
+                if (valSpan) valSpan.innerText = newValue;
+            }
+        }
+
+        function renderArray() {
+            container.innerHTML = '';
+            // Render active elements
+            for(let i=0; i<array.length; i++) {
+                createCell(array[i], i);
+            }
+            // Render empty slots (capacity)
+            for(let i=array.length; i<CAPACITY; i++) {
+                createEmptyCell(i);
+            }
+        }
+
+        function createCell(val, i) {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.id = `cell-${i}`;
+            
+            // Value Span for smooth updates
+            const valSpan = document.createElement('span');
+            valSpan.className = 'val-span';
+            valSpan.innerText = val;
+            
+            const idx = document.createElement('div');
+            idx.className = 'cell-index';
+            idx.innerText = i;
+            
+            const addr = document.createElement('div');
+            addr.className = 'cell-address';
+            addr.innerText = `0x${(100 + i*4).toString(16)}`; 
+            
+            cell.appendChild(valSpan);
+            cell.appendChild(idx);
+            cell.appendChild(addr);
+            container.appendChild(cell);
+        }
+
+        function createEmptyCell(i) {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.style.opacity = '0.3';
+            cell.style.borderStyle = 'dashed';
+            
+            const idx = document.createElement('div');
+            idx.className = 'cell-index';
+            idx.innerText = i;
+            
+            const addr = document.createElement('div');
+            addr.className = 'cell-address';
+            addr.innerText = `0x${(100 + i*4).toString(16)}`;
+            
+            cell.appendChild(idx);
+            cell.appendChild(addr);
+            container.appendChild(cell);
+        }
+
+        function resetArray() {
+            if(isRunning) return;
+            array = [10, 20, 30, 40, 50];
+            renderArray();
+            statusText.innerText = "Memory Reset. Contiguous block allocated.";
+            codeBlock.innerText = "// Array initialized in memory";
+            toggleButtons(false);
+        }
+
+        async function handleOp(type) {
+            if(isRunning) return;
+            initAudio();
+            isRunning = true;
+            toggleButtons(true);
+
+            let idx = parseInt(idxInput.value);
+            let val = parseInt(valInput.value);
+            let delay = parseInt(speedSlider.value);
+
+            // Safety: Clamp index to valid memory range (0 to 7)
+            if (idx > CAPACITY - 1) idx = CAPACITY - 1;
+            if (idx < 0) idx = 0;
+            
+            // Update input visually if we clamped it
+            idxInput.value = idx; 
+
+            try {
+                if (type === 'access') {
+                    // Access Logic
+                    if(idx >= array.length) throw "Index out of bounds (Empty Memory)";
+                    
+                    statusText.innerText = `Accessing address: 0x100 + (${idx} * 4)`;
+                    codeBlock.innerText = `let value = arr[${idx}];\n// O(1) Direct Memory Access`;
+                    
+                    const cell = document.getElementById(`cell-${idx}`);
+                    cell.classList.add('access');
+                    playNote(600);
+                    await sleep(delay * 1.5);
+                    cell.classList.remove('access');
+                    statusText.innerText = `Read value ${array[idx]} from Index ${idx}`;
+
+                } else if (type === 'insert') {
+                    // Insert Logic
+                    if(array.length >= CAPACITY) throw "Array Capacity Full";
+                    if(idx > array.length) idx = array.length; // Can only append if index > length
+
+                    statusText.innerText = `Shifting elements to make space at index ${idx}...`;
+                    codeBlock.innerText = `// Shift Right\nfor(let i = n; i > index; i--) {\n  arr[i] = arr[i-1];\n}\narr[index] = ${val};`;
+
+                    // 1. Logically expand array first
+                    array.push(0); 
+                    renderArray(); // Re-render to show the new empty slot
+                    
+                    // Hide the '0' visually for now
+                    const lastIdx = array.length - 1;
+                    updateCellVisual(lastIdx, ""); 
+
+                    await sleep(delay);
+
+                    // 2. Shift Animation (Right to Left)
+                    for(let i = lastIdx; i > idx; i--) {
+                        let curr = document.getElementById(`cell-${i}`);
+                        let prev = document.getElementById(`cell-${i-1}`);
+                        
+                        curr.classList.add('shifting');
+                        prev.classList.add('shifting');
+                        playNote(300);
+                        
+                        await sleep(delay);
+
+                        // Visual Move
+                        array[i] = array[i-1];
+                        updateCellVisual(i, array[i]);
+                        
+                        curr.classList.remove('shifting');
+                        prev.classList.remove('shifting');
+                    }
+
+                    // 3. Final Insert
+                    statusText.innerText = `Inserting ${val} at index ${idx}`;
+                    array[idx] = val;
+                    let target = document.getElementById(`cell-${idx}`);
+                    updateCellVisual(idx, val);
+                    
+                    target.classList.add('new');
+                    playNote(800);
+                    await sleep(delay);
+                    target.classList.remove('new');
+
+                } else if (type === 'delete') {
+                    // Delete Logic
+                    if(idx >= array.length) throw "Index out of bounds";
+
+                    statusText.innerText = `Deleting element at index ${idx}...`;
+                    codeBlock.innerText = `// Shift Left\nfor(let i = index; i < n-1; i++) {\n  arr[i] = arr[i+1];\n}\nlength--;`;
+
+                    let target = document.getElementById(`cell-${idx}`);
+                    target.classList.add('deleted');
+                    playNote(200);
+                    await sleep(delay);
+
+                    // Shift Animation (Left to Right)
+                    for(let i = idx; i < array.length - 1; i++) {
+                        let curr = document.getElementById(`cell-${i}`);
+                        let next = document.getElementById(`cell-${i+1}`);
+                        
+                        curr.classList.add('shifting');
+                        next.classList.add('shifting');
+                        
+                        statusText.innerText = `Copying ${array[i+1]} to index ${i}`;
+                        await sleep(delay);
+                        
+                        // Perform copy
+                        array[i] = array[i+1];
+                        updateCellVisual(i, array[i]);
+                        
+                        if(i === idx) curr.classList.remove('deleted');
+
+                        curr.classList.remove('shifting');
+                        next.classList.remove('shifting');
+                    }
+
+                    // Remove last element
+                    array.pop();
+                    renderArray();
+                    statusText.innerText = "Deletion Complete. Size reduced.";
+                }
+            } catch (error) {
+                statusText.innerText = "Error: " + error;
+                playNote(150);
+            }
+
+            isRunning = false;
+            toggleButtons(false);
+        }
+
+        function toggleButtons(disabled) {
+            document.getElementById('insertBtn').disabled = disabled;
+            document.getElementById('deleteBtn').disabled = disabled;
+            document.getElementById('accessBtn').disabled = disabled;
+            document.getElementById('resetBtn').disabled = disabled;
+        }
+
+        window.onload = resetArray;
+    </script>
+</body>
+</html>

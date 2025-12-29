@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insertion Sort</title>
-    <link rel="icon" type="image/svg+xml" href="../logo.svg">
-    <link rel="stylesheet" href="style.css">
+    <title>Selection Sort</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
 
@@ -28,7 +29,7 @@
     </button>
 
     <header>
-        <h1>Insertion Sort</h1>
+        <h1>Selection Sort</h1>
         <div class="complexity-stats">
             <span>Time: O(n²)</span>
             <span>Space: O(1)</span>
@@ -60,19 +61,19 @@
                 </div>
                 <span id="status-text">SYSTEM READY</span>
             </div>
-            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">insertionSort</span>(arr) {</span><span id="line-2" class="code-line">  <span class="kw">for</span> (<span class="kw">let</span> i = 1; i < arr.length; i++) {</span><span id="line-3" class="code-line">    <span class="kw">let</span> key = arr[i];</span><span id="line-4" class="code-line">    <span class="kw">let</span> j = i - 1;</span><span id="line-5" class="code-line">    <span class="comment">// Move elements > key</span></span><span id="line-6" class="code-line">    <span class="kw">while</span> (j >= 0 && arr[j] > key) {</span><span id="line-7" class="code-line">      arr[j + 1] = arr[j];</span><span id="line-8" class="code-line">      j--;</span><span id="line-9" class="code-line">    }</span><span id="line-10" class="code-line">    arr[j + 1] = key;</span><span id="line-11" class="code-line">  }</span><span id="line-12" class="code-line">}</span></pre>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">selectionSort</span>(arr) {</span><span id="line-2" class="code-line">  <span class="kw">const</span> n = arr.length;</span><span id="line-3" class="code-line">  <span class="kw">for</span> (<span class="kw">let</span> i = 0; i < n; i++) {</span><span id="line-4" class="code-line">    <span class="kw">let</span> min = i;</span><span id="line-5" class="code-line">    <span class="kw">for</span> (<span class="kw">let</span> j = i + 1; j < n; j++) {</span><span id="line-6" class="code-line">      <span class="comment">// Find minimum</span></span><span id="line-7" class="code-line">      <span class="kw">if</span> (arr[j] < arr[min]) {</span><span id="line-8" class="code-line">        min = j;</span><span id="line-9" class="code-line">      }</span><span id="line-10" class="code-line">    }</span><span id="line-11" class="code-line">    <span class="kw">if</span> (min !== i) swap(i, min);</span><span id="line-12" class="code-line">  }</span><span id="line-13" class="code-line">}</span></pre>
         </div>
     </div>
 
     <details class="info-box">
         <summary>How it Works</summary>
         <div class="info-content">
-            <p><strong>Concept:</strong> Insertion Sort builds the sorted array one item at a time. It is much like sorting playing cards in your hand.</p>
+            <p><strong>Concept:</strong> Selection Sort is a simple comparison-based algorithm. It divides the array into a sorted part and an unsorted part.</p>
             <p><strong>Steps:</strong></p>
             <ul>
-                <li><strong>Pick Key:</strong> It starts from the second element (the key) and compares it with the elements before it.</li>
-                <li><strong>Shift:</strong> If the key is smaller than the previous element, it shifts the previous element to the right.</li>
-                <li><strong>Insert:</strong> This repeats until the correct position for the key is found, and it is inserted there.</li>
+                <li><strong>Find Minimum:</strong> It scans the unsorted part to find the smallest element.</li>
+                <li><strong>Swap:</strong> The smallest element is swapped with the first element of the unsorted part.</li>
+                <li><strong>Repeat:</strong> The sorted boundary moves one step to the right, and the process repeats until the array is fully sorted.</li>
             </ul>
         </div>
     </details>
@@ -88,7 +89,7 @@
         const themeBtn = document.getElementById('themeBtn');
         
         let array = [];
-        const ARRAY_SIZE = 20;
+        const ARRAY_SIZE = 30;
         let audioCtx = null;
         let stopRequested = false;
         let isPaused = false;
@@ -134,10 +135,11 @@
             if (line) line.classList.add('active-line');
         }
 
+        // --- PAUSE LOGIC ---
         async function checkPause() {
             if (isPaused) {
                 statusText.innerText = "PAUSED";
-                statusText.style.color = "var(--accent-pivot)";
+                statusText.style.color = "var(--accent-min)";
                 await new Promise(resolve => { pauseResolver = resolve; });
                 statusText.innerText = "RUNNING";
                 statusText.style.color = "var(--accent-green)";
@@ -175,7 +177,7 @@
             statusText.innerText = "RUNNING";
             statusText.style.color = "var(--accent-green)";
             updateControls("running");
-            insertionSort();
+            selectionSort();
         }
 
         function pauseSort() {
@@ -215,70 +217,60 @@
             }
         }
 
-        async function insertionSort() {
-            initAudio(); 
-            highlightLine(1);
-            
+        async function selectionSort() {
+            initAudio(); highlightLine(1);
             const n = array.length;
             
-            highlightLine(2); 
-            for (let i = 1; i < n; i++) {
-                if (stopRequested) break;
+            for (let i = 0; i < n; i++) {
+                if(stopRequested) break;
                 await checkPause(); if(stopRequested) break;
-
-                highlightLine(3);
-                let key = array[i];
-                let j = i - 1;
                 
-                // Visual: Highlight Key (using Pivot Color)
-                const keyBar = document.getElementById(`bar-${i}`);
-                keyBar.classList.add('pivot'); 
-                await sleep(speedSlider.value);
+                highlightLine(3);
+                let min = i;
+                document.getElementById(`bar-${min}`).classList.add('min');
 
-                highlightLine(6);
-                while (j >= 0 && array[j] > key) {
+                highlightLine(5);
+                for (let j = i + 1; j < n; j++) {
                     if(stopRequested) break;
                     await checkPause(); if(stopRequested) break;
                     
-                    playNote(array[j]);
                     const barJ = document.getElementById(`bar-${j}`);
-                    const barNext = document.getElementById(`bar-${j+1}`);
-                    
-                    barJ.classList.add('compare');
+                    barJ.classList.add('scan');
+                    playNote(array[j]);
                     await sleep(speedSlider.value);
-                    
+
                     highlightLine(7);
-                    array[j + 1] = array[j];
+                    if (array[j] < array[min]) {
+                        document.getElementById(`bar-${min}`).classList.remove('min');
+                        min = j;
+                        highlightLine(8);
+                        document.getElementById(`bar-${min}`).classList.add('min');
+                    }
+                    barJ.classList.remove('scan');
+                }
+
+                highlightLine(11);
+                if (min !== i) {
+                    let temp = array[i]; 
+                    array[i] = array[min]; 
+                    array[min] = temp;
                     
-                    // Visual Swap
-                    barNext.style.height = `${array[j]}%`; 
-                    
-                    barJ.classList.remove('compare');
-                    highlightLine(8);
-                    j = j - 1;
+                    document.getElementById(`bar-${i}`).style.height = `${array[i]}%`;
+                    document.getElementById(`bar-${min}`).style.height = `${array[min]}%`;
+                    playNote(array[i]);
                 }
                 
-                if(stopRequested) break;
-
-                highlightLine(10);
-                array[j + 1] = key;
-                
-                // Visual Place Key
-                const placementBar = document.getElementById(`bar-${j+1}`);
-                placementBar.style.height = `${key}%`;
-                keyBar.classList.remove('pivot'); 
-                
-                // Mark sorted portion visually
-                for(let k=0; k<=i; k++) document.getElementById(`bar-${k}`).classList.add('sorted');
+                document.getElementById(`bar-${min}`).classList.remove('min');
+                document.getElementById(`bar-${i}`).classList.add('sorted');
                 await sleep(speedSlider.value);
             }
-
+            
             if (!stopRequested) {
                 statusText.innerText = "COMPLETE";
                 statusText.style.color = "var(--accent-green)";
                 updateControls("reset");
             }
-            highlightLine(12);
+            highlightLine(13);
         }
 
         window.onload = resetArray;

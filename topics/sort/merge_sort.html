@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Sort</title>
-    <link rel="icon" type="image/svg+xml" href="../logo.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>Merge Sort</title>
+    <link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+    <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
 
@@ -29,10 +28,10 @@
     </button>
 
     <header>
-        <h1>Quick Sort</h1>
+        <h1>Merge Sort</h1>
         <div class="complexity-stats">
             <span>Time: O(n log n)</span>
-            <span>Space: O(log n)</span>
+            <span>Space: O(n)</span>
         </div>
     </header>
 
@@ -44,15 +43,14 @@
         
         <div class="speed-control">
             <span>Fast</span>
-            <input type="range" id="speedSlider" min="10" max="500" value="200">
+            <input type="range" id="speedSlider" min="10" max="500" value="100">
             <span>Slow</span>
         </div>
     </div>
 
     <div class="main-content">
         <div class="chart-wrapper">
-            <div class="chart-container" id="chart-container">
-                </div>
+            <div class="chart-container" id="chart-container"></div>
         </div>
 
         <div class="code-window">
@@ -62,20 +60,19 @@
                 </div>
                 <span id="status-text">SYSTEM READY</span>
             </div>
-            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">quickSort</span>(arr, low, high) {</span><span id="line-2" class="code-line">  <span class="kw">if</span> (low < high) {</span><span id="line-3" class="code-line">    <span class="comment">// Partition array around pivot</span></span><span id="line-4" class="code-line">    <span class="kw">let</span> pi = partition(arr, low, high);</span><span id="line-5" class="code-line">    <span class="comment">// Recursive calls</span></span><span id="line-6" class="code-line">    quickSort(arr, low, pi - 1);</span><span id="line-7" class="code-line">    quickSort(arr, pi + 1, high);</span><span id="line-8" class="code-line">  }</span><span id="line-9" class="code-line">}</span><span id="line-10" class="code-line"> </span><span id="line-11" class="code-line"><span class="kw">function</span> <span class="func">partition</span>(arr, low, high) {</span><span id="line-12" class="code-line">  <span class="kw">let</span> pivot = arr[high];</span><span id="line-13" class="code-line">  <span class="kw">let</span> i = low - 1;</span><span id="line-14" class="code-line">  <span class="comment">// ...Swapping logic...</span></span><span id="line-15" class="code-line">}</span></pre>
+            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">mergeSort</span>(arr, l, r) {</span><span id="line-2" class="code-line">  <span class="kw">if</span> (l >= r) <span class="kw">return</span>;</span><span id="line-3" class="code-line">  <span class="kw">const</span> m = l + Math.floor((r - l) / 2);</span><span id="line-4" class="code-line">  mergeSort(arr, l, m);</span><span id="line-5" class="code-line">  mergeSort(arr, m + 1, r);</span><span id="line-6" class="code-line">  merge(arr, l, m, r);</span><span id="line-7" class="code-line">}</span><span id="line-8" class="code-line"> </span><span id="line-9" class="code-line"><span class="kw">function</span> <span class="func">merge</span>(arr, l, m, r) {</span><span id="line-10" class="code-line">  <span class="comment">// Copy data to temp arrays</span></span><span id="line-11" class="code-line">  <span class="comment">// Merge back to arr[l..r]</span></span><span id="line-12" class="code-line">}</span></pre>
         </div>
     </div>
 
     <details class="info-box">
         <summary>How it Works</summary>
         <div class="info-content">
-            <p><strong>Concept:</strong> Quick Sort is a divide-and-conquer algorithm. It picks an element as a <em>pivot</em> and partitions the given array around the picked pivot.</p>
-            
+            <p><strong>Concept:</strong> Merge Sort is a divide-and-conquer algorithm. It divides the input array into two halves, recursively sorts them, and then merges the two sorted halves.</p>
             <p><strong>Steps:</strong></p>
             <ul>
-                <li><strong>Choose Pivot:</strong> In this visualization, we select the last element as the pivot.</li>
-                <li><strong>Partition:</strong> Reorder the array so that all elements smaller than the pivot come before it, and all elements greater come after it.</li>
-                <li><strong>Recursion:</strong> Recursively apply the above steps to the sub-array of elements with smaller values and separate sub-array of elements with greater values.</li>
+                <li><strong>Divide:</strong> Find the middle point to divide the array into two halves.</li>
+                <li><strong>Conquer:</strong> Recursively call mergeSort for the first half and the second half.</li>
+                <li><strong>Combine:</strong> Merge the two halves sorted in step 2. This is where the actual sorting happens as elements are put back in order.</li>
             </ul>
         </div>
     </details>
@@ -91,12 +88,13 @@
         const themeBtn = document.getElementById('themeBtn');
         
         let array = [];
-        const ARRAY_SIZE = 30;
+        const ARRAY_SIZE = 40;
         let audioCtx = null;
         let stopRequested = false;
         let isPaused = false;
         let pauseResolver = null;
 
+        // Icons
         const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
 
@@ -109,13 +107,14 @@
             }
         }
 
-        function playNote(value) {
+        function playNote(value, type = 'sine') {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             const frequency = 200 + (value * 6);
+            osc.type = type;
             osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
@@ -177,7 +176,7 @@
             statusText.innerText = "RUNNING";
             statusText.style.color = "var(--accent-green)";
             updateControls("running");
-            runQuickSort();
+            runMergeSort();
         }
 
         function pauseSort() {
@@ -217,9 +216,9 @@
             }
         }
 
-        async function runQuickSort() {
+        async function runMergeSort() {
             initAudio();
-            await quickSort(0, array.length - 1);
+            await mergeSort(0, array.length - 1);
             if (!stopRequested) {
                 statusText.innerText = "COMPLETE";
                 statusText.style.color = "var(--accent-green)";
@@ -230,48 +229,90 @@
             }
         }
 
-        async function quickSort(low, high) {
-            if (low < high && !stopRequested) {
-                await checkPause(); if(stopRequested) return;
-                highlightLine(1); highlightLine(2);
-                let pi = await partition(low, high);
-                await checkPause(); if(stopRequested) return;
-                highlightLine(3); highlightLine(6); 
-                await quickSort(low, pi - 1);
-                await checkPause(); if(stopRequested) return;
-                highlightLine(7); 
-                await quickSort(pi + 1, high);
-            }
+        async function mergeSort(l, r) {
+            if (l >= r || stopRequested) return;
+            
+            await checkPause(); if(stopRequested) return;
+            highlightLine(1); highlightLine(2);
+            
+            const m = l + Math.floor((r - l) / 2);
+            
+            highlightLine(4); 
+            await mergeSort(l, m);
+            await checkPause(); if(stopRequested) return; // Check after recursive call
+
+            highlightLine(5); 
+            await mergeSort(m + 1, r);
+            await checkPause(); if(stopRequested) return; // Check after recursive call
+
+            highlightLine(6); 
+            await merge(l, m, r);
         }
 
-        async function partition(low, high) {
-            await checkPause(); if(stopRequested) return;
-            highlightLine(11); highlightLine(12);
-            let pivot = array[high];
-            document.getElementById(`bar-${high}`).classList.add('pivot');
-            let i = (low - 1);
+        async function merge(l, m, r) {
+            if (stopRequested) return;
+            highlightLine(9);
+            
+            const n1 = m - l + 1;
+            const n2 = r - m;
+            let L = new Array(n1);
+            let R = new Array(n2);
 
-            for (let j = low; j <= high - 1; j++) {
-                await checkPause(); if(stopRequested) return;
-                const barJ = document.getElementById(`bar-${j}`);
-                barJ.classList.add('active');
-                playNote(array[j]);
-                await sleep(speedSlider.value);
-
-                if (array[j] < pivot) {
-                    i++;
-                    let temp = array[i]; array[i] = array[j]; array[j] = temp;
-                    document.getElementById(`bar-${i}`).style.height = `${array[i]}%`;
-                    document.getElementById(`bar-${j}`).style.height = `${array[j]}%`;
-                }
-                barJ.classList.remove('active');
+            // Highlight sub-arrays being merged
+            for (let i = 0; i < n1; i++) {
+                L[i] = array[l + i];
+                const bar = document.getElementById(`bar-${l+i}`);
+                if(bar) bar.classList.add('active');
+            }
+            for (let j = 0; j < n2; j++) {
+                R[j] = array[m + 1 + j];
+                const bar = document.getElementById(`bar-${m+1+j}`);
+                if(bar) bar.classList.add('active');
             }
             
-            let temp = array[i + 1]; array[i + 1] = array[high]; array[high] = temp;
-            document.getElementById(`bar-${i + 1}`).style.height = `${array[i + 1]}%`;
-            document.getElementById(`bar-${high}`).style.height = `${array[high]}%`;
-            document.getElementById(`bar-${high}`).classList.remove('pivot');
-            return i + 1;
+            await sleep(speedSlider.value);
+            
+            let i = 0, j = 0, k = l;
+
+            while (i < n1 && j < n2) {
+                await checkPause(); if(stopRequested) return;
+                playNote(array[k]);
+                
+                if (L[i] <= R[j]) {
+                    array[k] = L[i];
+                    i++;
+                } else {
+                    array[k] = R[j];
+                    j++;
+                }
+                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
+                await sleep(speedSlider.value);
+                k++;
+            }
+
+            while (i < n1) {
+                await checkPause(); if(stopRequested) return;
+                array[k] = L[i];
+                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
+                i++;
+                k++;
+                await sleep(speedSlider.value);
+            }
+
+            while (j < n2) {
+                await checkPause(); if(stopRequested) return;
+                array[k] = R[j];
+                document.getElementById(`bar-${k}`).style.height = `${array[k]}%`;
+                j++;
+                k++;
+                await sleep(speedSlider.value);
+            }
+
+            // Remove highlight
+            for (let x = l; x <= r; x++) {
+                const bar = document.getElementById(`bar-${x}`);
+                if(bar) bar.classList.remove('active');
+            }
         }
 
         window.onload = resetArray;
