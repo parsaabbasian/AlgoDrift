@@ -9,10 +9,10 @@
     <style>
         /* Default (Dark Mode) Styles */
         .target-display {
-            background: rgba(255, 255, 255, 0.05); /* Subtle dark background */
+            background: rgba(255, 255, 255, 0.05);
             padding: 10px; border-radius: 8px; margin-bottom: 20px;
             font-weight: bold; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff; /* White text for dark mode */
+            color: #ffffff;
             transition: all 0.3s ease;
         }
 
@@ -27,6 +27,22 @@
         .bar.bound { background-color: #2196f3 !important; }
         .bar.found { background-color: #4caf50 !important; }
         .bar.ignored { opacity: 0.2; }
+
+        /* Language Selector Style */
+        .lang-selector {
+            margin-left: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            background: #2d2d2d;
+            color: white;
+            border: 1px solid #444;
+            cursor: pointer;
+        }
+        body.light-mode .lang-selector {
+            background: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
@@ -59,6 +75,13 @@
         <button onclick="startSearch()" id="startBtn">Binary Search</button>
         <button onclick="pauseSearch()" id="pauseBtn" disabled>Pause</button>
         <button onclick="continueSearch()" id="continueBtn" disabled>Resume</button>
+
+        <select id="languageSelect" class="lang-selector" onchange="updateCodeDisplay()">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="cpp">C++</option>
+        </select>
+
         <div class="speed-control">
             <span>Fast</span><input type="range" id="speedSlider" min="200" max="1500" value="800"><span>Slow</span>
         </div>
@@ -75,18 +98,7 @@
                 <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
                 <span id="status-text">SYSTEM READY</span>
             </div>
-            <pre><span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">binarySearch</span>(arr, target) {</span>
-<span id="line-2" class="code-line">  <span class="kw">let</span> low = 0, high = n - 1;</span>
-<span id="line-3" class="code-line">  <span class="kw">while</span> (low <= high) {</span>
-<span id="line-4" class="code-line">    <span class="kw">let</span> mid = Math.floor((low + high) / 2);</span>
-<span id="line-5" class="code-line">    <span class="kw">if</span> (arr[mid] === target) <span class="kw">return</span> mid;</span>
-<span id="line-6" class="code-line">    <span class="kw">if</span> (arr[mid] < target)</span>
-<span id="line-7" class="code-line">      low = mid + 1;</span>
-<span id="line-8" class="code-line">    <span class="kw">else</span></span>
-<span id="line-9" class="code-line">      high = mid - 1;</span>
-<span id="line-10" class="code-line">  }</span>
-<span id="line-11" class="code-line">  <span class="kw">return</span> -1;</span>
-<span id="line-12" class="code-line">}</span></pre>
+            <pre id="code-display"></pre>
         </div>
     </div>
 
@@ -114,17 +126,60 @@
         const pauseBtn = document.getElementById('pauseBtn');
         const continueBtn = document.getElementById('continueBtn');
         const themeBtn = document.getElementById('themeBtn');
+        const codeDisplay = document.getElementById('code-display');
+        const languageSelect = document.getElementById('languageSelect');
 
         const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
 
+        const codeSnippets = {
+            javascript: `
+<span id="line-1" class="code-line"><span class="kw">function</span> <span class="func">binarySearch</span>(arr, target) {</span>
+<span id="line-2" class="code-line">  <span class="kw">let</span> low = 0, high = arr.length - 1;</span>
+<span id="line-3" class="code-line">  <span class="kw">while</span> (low <= high) {</span>
+<span id="line-4" class="code-line">    <span class="kw">let</span> mid = Math.floor((low + high) / 2);</span>
+<span id="line-5" class="code-line">    <span class="kw">if</span> (arr[mid] === target) <span class="kw">return</span> mid;</span>
+<span id="line-6" class="code-line">    <span class="kw">if</span> (arr[mid] < target)</span>
+<span id="line-7" class="code-line">      low = mid + 1;</span>
+<span id="line-8" class="code-line">    <span class="kw">else</span></span>
+<span id="line-9" class="code-line">      high = mid - 1;</span>
+<span id="line-10" class="code-line">  }</span>
+<span id="line-11" class="code-line">  <span class="kw">return</span> -1;</span>
+<span id="line-12" class="code-line">}`,
+            python: `
+<span id="line-1" class="code-line"><span class="kw">def</span> <span class="func">binary_search</span>(arr, target):</span>
+<span id="line-2" class="code-line">  low, high = 0, <span class="func">len</span>(arr) - 1</span>
+<span id="line-3" class="code-line">  <span class="kw">while</span> low <= high:</span>
+<span id="line-4" class="code-line">    mid = (low + high) // 2</span>
+<span id="line-5" class="code-line">    <span class="kw">if</span> arr[mid] == target: <span class="kw">return</span> mid</span>
+<span id="line-6" class="code-line">    <span class="kw">if</span> arr[mid] < target:</span>
+<span id="line-7" class="code-line">      low = mid + 1</span>
+<span id="line-8" class="code-line">    <span class="kw">else</span>:</span>
+<span id="line-9" class="code-line">      high = mid - 1</span>
+<span id="line-11" class="code-line">  <span class="kw">return</span> -1</span>`,
+            cpp: `
+<span id="line-1" class="code-line"><span class="kw">int</span> <span class="func">binarySearch</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n, <span class="kw">int</span> x) {</span>
+<span id="line-2" class="code-line">  <span class="kw">int</span> low = 0, high = n - 1;</span>
+<span id="line-3" class="code-line">  <span class="kw">while</span> (low <= high) {</span>
+<span id="line-4" class="code-line">    <span class="kw">int</span> mid = low + (high - low) / 2;</span>
+<span id="line-5" class="code-line">    <span class="kw">if</span> (arr[mid] == x) <span class="kw">return</span> mid;</span>
+<span id="line-6" class="code-line">    <span class="kw">if</span> (arr[mid] < x)</span>
+<span id="line-7" class="code-line">      low = mid + 1;</span>
+<span id="line-8" class="code-line">    <span class="kw">else</span></span>
+<span id="line-9" class="code-line">      high = mid - 1;</span>
+<span id="line-10" class="code-line">  }</span>
+<span id="line-11" class="code-line">  <span class="kw">return</span> -1;</span>
+<span id="line-12" class="code-line">}`
+        };
+
+        function updateCodeDisplay() {
+            const lang = languageSelect.value;
+            codeDisplay.innerHTML = codeSnippets[lang].trim();
+        }
+
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
-            if (document.body.classList.contains('light-mode')) {
-                themeBtn.innerHTML = moonIcon;
-            } else {
-                themeBtn.innerHTML = sunIcon;
-            }
+            themeBtn.innerHTML = document.body.classList.contains('light-mode') ? moonIcon : sunIcon;
         }
 
         let array = [];
@@ -168,9 +223,8 @@
         function resetArray() {
             stopRequested = true; 
             isPaused = false; 
-            if(pauseResolver) pauseResolver();
+            if(pauseResolver) pauseResolver(); 
             
-            // Reset Button States
             startBtn.disabled = true;
             resetBtn.disabled = true;
             pauseBtn.disabled = true;
@@ -212,7 +266,7 @@
                 isPaused = true; 
                 pauseBtn.disabled = true;
                 continueBtn.disabled = false;
-                resetBtn.disabled = false; // ENABLED: User can reset while paused
+                resetBtn.disabled = false;
             }
         }
         
@@ -222,7 +276,7 @@
                 if(pauseResolver) pauseResolver(); 
                 pauseBtn.disabled = false;
                 continueBtn.disabled = true;
-                resetBtn.disabled = true; // DISABLED: Locked again while running
+                resetBtn.disabled = true;
             }
         }
 
@@ -296,7 +350,10 @@
             continueBtn.disabled = true;
         }
 
-        window.onload = resetArray;
+        window.onload = () => {
+            resetArray();
+            updateCodeDisplay();
+        };
     </script>
 </body>
 </html>
